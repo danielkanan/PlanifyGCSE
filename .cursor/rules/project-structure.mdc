@@ -1,0 +1,47 @@
+---
+alwaysApply: true
+description: Project structure and architecture guidelines for Planify GCSE
+---
+
+# Planify GCSE Project Structure
+
+This is a Next.js 15 application with TypeScript, Tailwind CSS, and shadcn/ui components.
+
+## Project Architecture
+
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS with custom design system
+- **Components**: shadcn/ui components in [src/components/ui/](mdc:src/components/ui/)
+- **Utilities**: Helper functions in [src/lib/utils.ts](mdc:src/lib/utils.ts)
+- **Configuration**: 
+  - [components.json](mdc:components.json) - shadcn/ui configuration
+  - [tailwind.config.ts](mdc:tailwind.config.ts) - Tailwind CSS configuration
+  - [tsconfig.json](mdc:tsconfig.json) - TypeScript configuration
+
+## Directory Structure
+
+```
+src/
+├── app/                    # Next.js App Router pages
+│   ├── globals.css        # Global styles and CSS variables
+│   ├── layout.tsx         # Root layout component
+│   └── page.tsx           # Homepage
+├── components/            # React components
+│   └── ui/               # shadcn/ui components
+└── lib/                  # Utility functions and configurations
+    └── utils.ts          # Common utility functions
+```
+
+## Key Files
+
+- [src/app/page.tsx](mdc:src/app/page.tsx) - Main homepage showcasing components
+- [src/app/layout.tsx](mdc:src/app/layout.tsx) - Root layout with metadata
+- [src/app/globals.css](mdc:src/app/globals.css) - Global styles and CSS variables
+- [components.json](mdc:components.json) - shadcn/ui component configuration
+
+## Import Aliases
+
+Use the `@/*` import alias for clean imports:
+- `@/components/ui/button` instead of `../../../components/ui/button`
+- `@/lib/utils` instead of `../../lib/utils`

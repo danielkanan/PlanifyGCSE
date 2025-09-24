@@ -1,0 +1,67 @@
+---
+globs: *.tsx,*.ts,*.css
+description: Tailwind CSS and styling guidelines
+---
+
+# Tailwind CSS & Styling Guidelines
+
+## Tailwind CSS Best Practices
+
+- Use utility classes for styling
+- Prefer Tailwind classes over custom CSS
+- Use responsive prefixes (`sm:`, `md:`, `lg:`, `xl:`)
+- Leverage dark mode with `dark:` prefix
+- Use CSS variables for theming (defined in [src/app/globals.css](mdc:src/app/globals.css))
+
+## Design System
+
+The project uses a consistent design system with:
+
+- **Colors**: Neutral base with semantic color tokens
+- **Spacing**: Consistent spacing scale (4, 8, 12, 16, 24, 32, 48, 64px)
+- **Typography**: Inter font family with proper hierarchy
+- **Borders**: Consistent border radius and styles
+- **Shadows**: Subtle shadows for depth
+
+## Component Styling
+
+- Use shadcn/ui components as base
+- Extend with Tailwind classes for customization
+- Maintain consistent spacing and typography
+- Use semantic color tokens for accessibility
+
+## Responsive Design
+
+- Mobile-first approach
+- Use responsive breakpoints consistently
+- Test on multiple screen sizes
+- Use container queries when appropriate
+
+## Dark Mode Support
+
+- Always include dark mode variants
+- Use CSS variables for theme switching
+- Test both light and dark themes
+- Ensure proper contrast ratios
+
+## Example Styling Patterns
+
+```tsx
+// Responsive card with dark mode
+<Card className="w-full md:w-1/2 lg:w-1/3 bg-white dark:bg-slate-800">
+  <CardHeader className="p-6">
+    <CardTitle className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+      Title
+    </CardTitle>
+  </CardHeader>
+</Card>
+
+// Button with variants
+<Button 
+  variant="outline" 
+  size="lg" 
+  className="w-full sm:w-auto hover:bg-slate-50 dark:hover:bg-slate-800"
+>
+  Action
+</Button>
+```

@@ -1,0 +1,71 @@
+---
+globs: src/components/ui/*.tsx
+description: shadcn/ui component usage and customization guidelines
+---
+
+# shadcn/ui Component Guidelines
+
+## Component Usage
+
+- Use shadcn/ui components from [src/components/ui/](mdc:src/components/ui/)
+- Import components using the `@/components/ui/` alias
+- Extend components with additional props and styling as needed
+
+## Available Components
+
+- **Button**: [src/components/ui/button.tsx](mdc:src/components/ui/button.tsx)
+- **Card**: [src/components/ui/card.tsx](mdc:src/components/ui/card.tsx)
+- **Input**: [src/components/ui/input.tsx](mdc:src/components/ui/input.tsx)
+- **Label**: [src/components/ui/label.tsx](mdc:src/components/ui/label.tsx)
+
+## Adding New Components
+
+Use the shadcn CLI to add new components:
+
+```bash
+npx shadcn@latest add [component-name]
+```
+
+## Component Customization
+
+- Extend components with additional props
+- Use `className` prop for styling overrides
+- Maintain accessibility features
+- Follow the component's API design
+
+## Best Practices
+
+- Always use proper TypeScript types
+- Maintain component composition patterns
+- Use variants for different states
+- Implement proper error handling
+- Follow accessibility guidelines
+
+## Example Usage
+
+```tsx
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+export function ExampleComponent() {
+  return (
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle>Example</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Button variant="outline" className="w-full">
+          Action
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+## Component Configuration
+
+The project configuration is in [components.json](mdc:components.json) and includes:
+- Component registry settings
+- Styling preferences
+- Import path configurations

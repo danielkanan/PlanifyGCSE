@@ -1,0 +1,82 @@
+---
+globs: src/app/**/*.tsx,src/app/**/*.ts
+description: Next.js App Router and routing guidelines
+---
+
+# Next.js App Router Guidelines
+
+## App Router Structure
+
+- Use the App Router (not Pages Router)
+- File-based routing in [src/app/](mdc:src/app/) directory
+- Each route is a folder with a `page.tsx` file
+- Layout components are `layout.tsx` files
+
+## Routing Patterns
+
+- **Static Routes**: `src/app/about/page.tsx` → `/about`
+- **Dynamic Routes**: `src/app/users/[id]/page.tsx` → `/users/123`
+- **Nested Routes**: Use `layout.tsx` for shared layouts
+- **Route Groups**: Use `(group)` folders for organization
+
+## Page Components
+
+- Export default function as page component
+- Use proper TypeScript types
+- Implement proper metadata
+- Handle loading and error states
+
+## Layout Components
+
+- Create shared layouts with `layout.tsx`
+- Use nested layouts for complex UI structures
+- Implement proper metadata inheritance
+- Handle theme providers and global state
+
+## Metadata and SEO
+
+- Use Next.js metadata API
+- Implement proper Open Graph tags
+- Add structured data when appropriate
+- Ensure proper meta descriptions
+
+## Example Page Structure
+
+```tsx
+import { Metadata } from 'next';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+export const metadata: Metadata = {
+  title: 'Page Title',
+  description: 'Page description',
+};
+
+export default function Page() {
+  return (
+    <div className="container mx-auto py-8">
+      <Card>
+        <CardHeader>
+          <CardTitle>Page Content</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {/* Page content */}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+```
+
+## Server vs Client Components
+
+- Use Server Components by default
+- Add `'use client'` directive only when needed
+- Prefer Server Components for better performance
+- Use Client Components for interactivity
+
+## Data Fetching
+
+- Use `fetch()` in Server Components
+- Implement proper error handling
+- Use loading.tsx for loading states
+- Use error.tsx for error boundaries
