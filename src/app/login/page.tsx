@@ -29,7 +29,7 @@ export default function LoginPage() {
             Log in to your account
           </h2>
           <p className="text-muted-foreground">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link href="/register" className="text-primary hover:underline">
               Sign Up!
             </Link>
