@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Planify GCSE - Smart Revision Planning for Students",
   description: "Plan, track and structure your GCSE revision effectively. Use Planify's intelligent revision planning tool to plan and ace your exams.",
+  icons: {
+    icon: '/icon.svg',
+  },
 };
 
 export default function RootLayout({
