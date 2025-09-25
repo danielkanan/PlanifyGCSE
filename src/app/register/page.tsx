@@ -96,7 +96,7 @@ export default function RegisterPage() {
         throw new Error("reCAPTCHA verification failed");
       }
 
-      const userCredential = await createAccount(formData.email, formData.password);
+      await createAccount(formData.email, formData.password);
       
       // Send verification email after successful account creation
       try {

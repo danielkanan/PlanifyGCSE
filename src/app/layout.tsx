@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 
@@ -28,12 +29,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <script src={`https://www.google.com/recaptcha/enterprise.js?render=6LccOtUrAAAAAPjsyU74q-VDCqOpKZ5z_pv-OsHD`}></script>
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Script
+          src="https://www.google.com/recaptcha/enterprise.js?render=6LccOtUrAAAAAPjsyU74q-VDCqOpKZ5z_pv-OsHD"
+          strategy="beforeInteractive"
+        />
         <AuthProvider>
           {children}
         </AuthProvider>

@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     const verificationLink = await admin.auth().generateEmailVerificationLink(email, actionCodeSettings);
 
     // Send custom verification email via Resend
-    const emailResponse = await resend.emails.send({
+    await resend.emails.send({
       from: process.env.EMAIL_FROM || 'noreply@planifygcse.com',
       to: email,
       subject: 'Verify your PlanifyGCSE email address',

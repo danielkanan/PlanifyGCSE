@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success,
       score,
-      reasons,
+      reasons: reasons.map((reason: unknown) => String(reason)),
     } as RecaptchaResponse);
 
   } catch (error) {

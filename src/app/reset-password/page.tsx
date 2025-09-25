@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { confirmPasswordReset, verifyPasswordResetCode } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -71,19 +71,32 @@ export default function ResetPasswordPage() {
       // Use Firebase client SDK to confirm password reset
       await confirmPasswordReset(auth, oobCode, password);
       setSuccess(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Password reset failed:", error);
       
       // Handle specific Firebase errors
-      if (error.code === 'auth/expired-action-code') {
-        setError("Reset link has expired. Please request a new one.");
-      } else if (error.code === 'auth/invalid-action-code') {
-        setError("Invalid reset link. Please request a new one.");
-      } else if (error.code === 'auth/weak-password') {
-        setError("Password is too weak. Please choose a stronger password.");
-      } else if (error.code === 'auth/user-disabled') {
-        setError("This account has been disabled. Please contact support.");
-      } else if (error.message) {
+      if (error && typeof error === 'object' && 'code' in error) {
+        switch (error.code) {
+          case 'auth/expired-action-code':
+            setError("Reset link has expired. Please request a new one.");
+            break;
+          case 'auth/invalid-action-code':
+            setError("Invalid reset link. Please request a new one.");
+            break;
+          case 'auth/weak-password':
+            setError("Password is too weak. Please choose a stronger password.");
+            break;
+          case 'auth/user-disabled':
+            setError("This account has been disabled. Please contact support.");
+            break;
+          default:
+            if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+              setError(error.message);
+            } else {
+              setError("An unexpected error occurred. Please try again");
+            }
+        }
+      } else if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
         setError(error.message);
       } else {
         setError("An unexpected error occurred. Please try again");
@@ -352,5 +365,34 @@ export default function ResetPasswordPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="w-full max-w-md space-y-6">
+          <div className="text-center">
+            <div className="flex items-center justify-center space-x-2 mb-8">
+              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-lg">P</span>
+              </div>
+              <h1 className="text-3xl font-bold text-foreground">Planify</h1>
+            </div>
+          </div>
+          <Card className="w-full">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <span className="ml-3 text-muted-foreground">Loading...</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    }>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }

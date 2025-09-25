@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     const customResetLink = `https://planifygcse.com/reset-password?oobCode=${oobCode}`;
 
     // Send custom email via Resend
-    const emailResponse = await resend.emails.send({
+    await resend.emails.send({
       from: process.env.EMAIL_FROM || 'noreply@planifygcse.com',
       to: email,
       subject: 'Reset your PlanifyGCSE password',
@@ -120,25 +120,26 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Password reset error:', error);
     
     // Handle specific Firebase errors
-    if (error.code === 'auth/user-not-found') {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'auth/user-not-found') {
       return NextResponse.json(
         { error: 'No account found with this email address.' },
         { status: 400 }
       );
     }
     
-    if (error.code === 'auth/invalid-email') {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'auth/invalid-email') {
       return NextResponse.json(
         { error: 'Please enter a valid email address.' },
         { status: 400 }
       );
     }
     
-    if (error.code === 'auth/too-many-requests' || error.message?.includes('RESET_PASSWORD_EXCEED_LIMIT')) {
+    if ((error && typeof error === 'object' && 'code' in error && error.code === 'auth/too-many-requests') || 
+        (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string' && error.message.includes('RESET_PASSWORD_EXCEED_LIMIT'))) {
       return NextResponse.json(
         { error: 'Too many password reset requests. Please wait a few minutes before trying again.' },
         { status: 429 }
