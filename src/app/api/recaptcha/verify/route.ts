@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { RecaptchaEnterpriseServiceClient } from '@google-cloud/recaptcha-enterprise';
 import type { RecaptchaVerificationRequest, RecaptchaResponse } from '@/types/recaptcha.types';
 import { getRecaptchaConfig } from '@/lib/recaptcha.config';
+import serviceAccount from '../../../../../firebase-admin-key.json';
 
 const config = getRecaptchaConfig();
 
@@ -22,9 +23,15 @@ export async function POST(request: NextRequest) {
 
 
 
-    // Create the reCAPTCHA Enterprise client
+    // Create the reCAPTCHA Enterprise client with explicit credentials
     console.log('Creating reCAPTCHA Enterprise client for project:', config.PROJECT_ID);
-    const client = new RecaptchaEnterpriseServiceClient();
+    const client = new RecaptchaEnterpriseServiceClient({
+      credentials: {
+        client_email: serviceAccount.client_email,
+        private_key: serviceAccount.private_key,
+      },
+      projectId: config.PROJECT_ID,
+    });
     const projectPath = client.projectPath(config.PROJECT_ID);
 
     // Build the assessment request
