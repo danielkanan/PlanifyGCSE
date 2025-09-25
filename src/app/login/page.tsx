@@ -1,15 +1,108 @@
+"use client";
+
 import type { Metadata } from "next";
 import Link from "next/link";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { signInWithGoogle, signInWithMicrosoft, signInWithEmail } from "@/lib/auth";
+import { useRouter } from "next/navigation";
+import { useRecaptcha } from "@/hooks/useRecaptcha";
+import { RECAPTCHA_ACTIONS } from "@/types/recaptcha.types";
+import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
 
-export const metadata: Metadata = {
-  title: "Sign In - Planify GCSE",
-  description: "Sign in to your Planify GCSE account to continue your revision planning",
-};
 
 export default function LoginPage() {
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const router = useRouter();
+  const { executeRecaptcha, verifyRecaptcha } = useRecaptcha();
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      
+      // Execute reCAPTCHA
+      const token = await executeRecaptcha(RECAPTCHA_ACTIONS.GOOGLE_SIGNIN);
+      if (!token) {
+        throw new Error("reCAPTCHA verification failed");
+      }
+
+      // Verify reCAPTCHA on backend
+      const isValid = await verifyRecaptcha(token, RECAPTCHA_ACTIONS.GOOGLE_SIGNIN);
+      if (!isValid) {
+        throw new Error("reCAPTCHA verification failed");
+      }
+
+      await signInWithGoogle();
+      router.push("/");
+    } catch (error) {
+      console.error("Google sign-in failed:", error);
+      setError(getFirebaseErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMicrosoftSignIn = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      
+      // Execute reCAPTCHA
+      const token = await executeRecaptcha(RECAPTCHA_ACTIONS.MICROSOFT_SIGNIN);
+      if (!token) {
+        throw new Error("reCAPTCHA verification failed");
+      }
+
+      // Verify reCAPTCHA on backend
+      const isValid = await verifyRecaptcha(token, RECAPTCHA_ACTIONS.MICROSOFT_SIGNIN);
+      if (!isValid) {
+        throw new Error("reCAPTCHA verification failed");
+      }
+
+      await signInWithMicrosoft();
+      router.push("/");
+    } catch (error) {
+      console.error("Microsoft sign-in failed:", error);
+      setError(getFirebaseErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEmailSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      setError("");
+      
+      // Execute reCAPTCHA
+      const token = await executeRecaptcha(RECAPTCHA_ACTIONS.LOGIN);
+      if (!token) {
+        throw new Error("reCAPTCHA verification failed");
+      }
+
+      // Verify reCAPTCHA on backend
+      const isValid = await verifyRecaptcha(token, RECAPTCHA_ACTIONS.LOGIN);
+      if (!isValid) {
+        throw new Error("reCAPTCHA verification failed");
+      }
+
+      await signInWithEmail(email, password);
+      router.push("/");
+    } catch (error) {
+      console.error("Email sign-in failed:", error);
+      setError(getFirebaseErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
@@ -41,6 +134,8 @@ export default function LoginPage() {
           <Button 
             variant="outline" 
             className="w-full h-12 flex items-center justify-center gap-3 text-foreground border-input hover:bg-accent"
+            onClick={handleGoogleSignIn}
+            disabled={loading}
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
@@ -66,11 +161,13 @@ export default function LoginPage() {
           <Button 
             variant="outline" 
             className="w-full h-12 flex items-center justify-center gap-3 text-foreground border-input hover:bg-accent"
+            onClick={handleMicrosoftSignIn}
+            disabled={loading}
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+              <path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zm12.6 0H12.6V0H24v11.4z"/>
             </svg>
-            Continue with Apple
+            Continue with Microsoft
           </Button>
         </div>
 
@@ -85,7 +182,20 @@ export default function LoginPage() {
         </div>
 
         {/* Login Form */}
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={handleEmailSignIn}>
+          {error && (
+            <div className="p-4 rounded-lg bg-muted/50 border border-border/60 backdrop-blur-sm">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <svg className="w-4 h-4 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <p className="text-sm text-foreground/90 leading-relaxed">{error}</p>
+              </div>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-medium text-foreground">
               Email
@@ -95,7 +205,10 @@ export default function LoginPage() {
               type="email"
               placeholder="Your Email Address"
               className="h-12"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
 
@@ -106,17 +219,21 @@ export default function LoginPage() {
             <Input
               id="password"
               type="password"
-              placeholder="Create a Password"
+              placeholder="Enter your Password"
               className="h-12"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
 
           <Button 
             type="submit" 
             className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
+            disabled={loading}
           >
-            Login
+            {loading ? "Signing in..." : "Login"}
           </Button>
 
           <div className="text-center">

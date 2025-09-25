@@ -117,3 +117,17 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Hide reCAPTCHA badge/anchor */
+.grecaptcha-badge {
+  visibility: hidden !important;
+}
+
+/* Alternative selectors for different reCAPTCHA versions */
+iframe[src*="recaptcha"] {
+  display: none !important;
+}
+
+div[style*="recaptcha"] {
+  display: none !important;
+}
