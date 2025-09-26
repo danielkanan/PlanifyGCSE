@@ -30,10 +30,6 @@ export function getFirebaseErrorMessage(error: unknown): string {
       case 'auth/operation-not-allowed':
         return 'This sign-in method is not enabled. Please contact support.';
       
-      // reCAPTCHA errors
-      case 'auth/captcha-check-failed':
-        return 'reCAPTCHA verification failed. Please try again.';
-      
       // Generic Firebase errors
       case 'auth/internal-error':
         return 'An internal error occurred. Please try again later.';
@@ -47,10 +43,6 @@ export function getFirebaseErrorMessage(error: unknown): string {
   }
   
   if (error instanceof Error) {
-    // Handle custom errors (like reCAPTCHA failures)
-    if (error.message.includes('reCAPTCHA')) {
-      return 'Security verification failed. Please try again.';
-    }
     return error.message;
   }
   

@@ -7,8 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
-import { useRecaptcha } from "@/hooks/useRecaptcha";
-import { RECAPTCHA_ACTIONS } from "@/types/recaptcha.types";
 import { FirebaseError } from "firebase/app";
 
 export default function ForgotPasswordPage() {
@@ -17,7 +15,6 @@ export default function ForgotPasswordPage() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
-  const { executeRecaptcha, verifyRecaptcha } = useRecaptcha();
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,18 +36,6 @@ export default function ForgotPasswordPage() {
     try {
       setLoading(true);
       
-      // Execute reCAPTCHA
-      const token = await executeRecaptcha(RECAPTCHA_ACTIONS.FORGOT_PASSWORD);
-      if (!token) {
-        throw new Error("reCAPTCHA verification failed");
-      }
-
-      // Verify reCAPTCHA on backend
-      const isValid = await verifyRecaptcha(token, RECAPTCHA_ACTIONS.FORGOT_PASSWORD);
-      if (!isValid) {
-        throw new Error("reCAPTCHA verification failed");
-      }
-
       // Send custom password reset email via our API
       const response = await fetch('/api/send-reset-link', {
         method: 'POST',

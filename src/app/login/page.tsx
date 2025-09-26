@@ -1,5 +1,6 @@
 "use client";
 
+import type { Metadata } from "next";
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -7,41 +8,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signInWithGoogle, signInWithMicrosoft, signInWithEmail } from "@/lib/auth";
 import { useRouter } from "next/navigation";
-import { useRecaptcha } from "@/hooks/useRecaptcha";
-import { RECAPTCHA_ACTIONS } from "@/types/recaptcha.types";
-import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
 
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const router = useRouter();
-  const { executeRecaptcha, verifyRecaptcha } = useRecaptcha();
 
   const handleGoogleSignIn = async () => {
     try {
       setLoading(true);
-      setError("");
-      
-      // Execute reCAPTCHA
-      const token = await executeRecaptcha(RECAPTCHA_ACTIONS.GOOGLE_SIGNIN);
-      if (!token) {
-        throw new Error("reCAPTCHA verification failed");
-      }
-
-      // Verify reCAPTCHA on backend
-      const isValid = await verifyRecaptcha(token, RECAPTCHA_ACTIONS.GOOGLE_SIGNIN);
-      if (!isValid) {
-        throw new Error("reCAPTCHA verification failed");
-      }
-
       await signInWithGoogle();
       router.push("/");
     } catch (error) {
       console.error("Google sign-in failed:", error);
-      setError(getFirebaseErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -50,25 +31,10 @@ export default function LoginPage() {
   const handleMicrosoftSignIn = async () => {
     try {
       setLoading(true);
-      setError("");
-      
-      // Execute reCAPTCHA
-      const token = await executeRecaptcha(RECAPTCHA_ACTIONS.MICROSOFT_SIGNIN);
-      if (!token) {
-        throw new Error("reCAPTCHA verification failed");
-      }
-
-      // Verify reCAPTCHA on backend
-      const isValid = await verifyRecaptcha(token, RECAPTCHA_ACTIONS.MICROSOFT_SIGNIN);
-      if (!isValid) {
-        throw new Error("reCAPTCHA verification failed");
-      }
-
       await signInWithMicrosoft();
       router.push("/");
     } catch (error) {
       console.error("Microsoft sign-in failed:", error);
-      setError(getFirebaseErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -78,25 +44,10 @@ export default function LoginPage() {
     e.preventDefault();
     try {
       setLoading(true);
-      setError("");
-      
-      // Execute reCAPTCHA
-      const token = await executeRecaptcha(RECAPTCHA_ACTIONS.LOGIN);
-      if (!token) {
-        throw new Error("reCAPTCHA verification failed");
-      }
-
-      // Verify reCAPTCHA on backend
-      const isValid = await verifyRecaptcha(token, RECAPTCHA_ACTIONS.LOGIN);
-      if (!isValid) {
-        throw new Error("reCAPTCHA verification failed");
-      }
-
       await signInWithEmail(email, password);
       router.push("/");
     } catch (error) {
       console.error("Email sign-in failed:", error);
-      setError(getFirebaseErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -182,19 +133,6 @@ export default function LoginPage() {
 
         {/* Login Form */}
         <form className="space-y-4" onSubmit={handleEmailSignIn}>
-          {error && (
-            <div className="p-4 rounded-lg bg-muted/50 border border-border/60 backdrop-blur-sm">
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 mt-0.5">
-                  <svg className="w-4 h-4 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <p className="text-sm text-foreground/90 leading-relaxed">{error}</p>
-              </div>
-            </div>
-          )}
-
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-medium text-foreground">
               Email

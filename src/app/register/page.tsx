@@ -7,14 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signInWithGoogle, signInWithMicrosoft, createAccount } from "@/lib/auth";
 import { useRouter } from "next/navigation";
-import { useRecaptcha } from "@/hooks/useRecaptcha";
-import { RECAPTCHA_ACTIONS } from "@/types/recaptcha.types";
-import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
 
 export default function RegisterPage() {
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -22,30 +18,14 @@ export default function RegisterPage() {
     password: ""
   });
   const router = useRouter();
-  const { executeRecaptcha, verifyRecaptcha } = useRecaptcha();
 
   const handleGoogleSignIn = async () => {
     try {
       setLoading(true);
-      setError("");
-      
-      // Execute reCAPTCHA
-      const token = await executeRecaptcha(RECAPTCHA_ACTIONS.GOOGLE_SIGNIN);
-      if (!token) {
-        throw new Error("reCAPTCHA verification failed");
-      }
-
-      // Verify reCAPTCHA on backend
-      const isValid = await verifyRecaptcha(token, RECAPTCHA_ACTIONS.GOOGLE_SIGNIN);
-      if (!isValid) {
-        throw new Error("reCAPTCHA verification failed");
-      }
-
       await signInWithGoogle();
       router.push("/");
     } catch (error) {
       console.error("Google sign-in failed:", error);
-      setError(getFirebaseErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -54,25 +34,10 @@ export default function RegisterPage() {
   const handleMicrosoftSignIn = async () => {
     try {
       setLoading(true);
-      setError("");
-      
-      // Execute reCAPTCHA
-      const token = await executeRecaptcha(RECAPTCHA_ACTIONS.MICROSOFT_SIGNIN);
-      if (!token) {
-        throw new Error("reCAPTCHA verification failed");
-      }
-
-      // Verify reCAPTCHA on backend
-      const isValid = await verifyRecaptcha(token, RECAPTCHA_ACTIONS.MICROSOFT_SIGNIN);
-      if (!isValid) {
-        throw new Error("reCAPTCHA verification failed");
-      }
-
       await signInWithMicrosoft();
       router.push("/");
     } catch (error) {
       console.error("Microsoft sign-in failed:", error);
-      setError(getFirebaseErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -82,41 +47,10 @@ export default function RegisterPage() {
     e.preventDefault();
     try {
       setLoading(true);
-      setError("");
-      
-      // Execute reCAPTCHA
-      const token = await executeRecaptcha(RECAPTCHA_ACTIONS.REGISTER);
-      if (!token) {
-        throw new Error("reCAPTCHA verification failed");
-      }
-
-      // Verify reCAPTCHA on backend
-      const isValid = await verifyRecaptcha(token, RECAPTCHA_ACTIONS.REGISTER);
-      if (!isValid) {
-        throw new Error("reCAPTCHA verification failed");
-      }
-
       await createAccount(formData.email, formData.password);
-      
-      // Send verification email after successful account creation
-      try {
-        const verifyResponse = await fetch('/api/send-verify-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: formData.email }),
-        });
-        
-        if (!verifyResponse.ok) {
-          console.warn('Failed to send verification email, but account was created successfully');
-        }
-      } catch (verifyError) {
-        console.warn('Failed to send verification email:', verifyError);
-      }
-      
       router.push("/");
     } catch (error) {
       console.error("Registration failed:", error);
-      setError(getFirebaseErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -158,19 +92,6 @@ export default function RegisterPage() {
         {!showEmailForm ? (
           // Social Login Options
           <>
-            {error && (
-              <div className="p-4 rounded-lg bg-muted/50 border border-border/60 backdrop-blur-sm">
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 mt-0.5">
-                    <svg className="w-4 h-4 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <p className="text-sm text-foreground/90 leading-relaxed">{error}</p>
-                </div>
-              </div>
-            )}
-
             {/* Social Login Buttons */}
             <div className="space-y-3">
               <Button 
@@ -227,10 +148,7 @@ export default function RegisterPage() {
             <Button 
               variant="outline" 
               className="w-full h-12 flex items-center justify-center gap-3 text-foreground border-input hover:bg-accent"
-              onClick={() => {
-                setShowEmailForm(true);
-                setError("");
-              }}
+              onClick={() => setShowEmailForm(true)}
               disabled={loading}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -242,19 +160,6 @@ export default function RegisterPage() {
         ) : (
           // Email Registration Form
           <form className="space-y-4" onSubmit={handleEmailRegister}>
-            {error && (
-              <div className="p-4 rounded-lg bg-muted/50 border border-border/60 backdrop-blur-sm">
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 mt-0.5">
-                    <svg className="w-4 h-4 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <p className="text-sm text-foreground/90 leading-relaxed">{error}</p>
-                </div>
-              </div>
-            )}
-
             <div className="space-y-2">
               <Label htmlFor="name" className="text-sm font-medium text-foreground">
                 Your Name
@@ -344,10 +249,7 @@ export default function RegisterPage() {
               type="button"
               variant="outline" 
               className="w-full h-12 flex items-center justify-center gap-3 text-foreground border-input hover:bg-accent"
-              onClick={() => {
-                setShowEmailForm(false);
-                setError("");
-              }}
+              onClick={() => setShowEmailForm(false)}
               disabled={loading}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
