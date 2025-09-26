@@ -1,0 +1,193 @@
+---
+alwaysApply: true
+description: Framer Motion animation guidelines and best practices for the Planify GCSE project
+---
+
+# Framer Motion Animation Guidelines
+
+This project uses Framer Motion for smooth, blur-enhanced animations throughout the application.
+
+## Core Animation Components
+
+### Animation Components Location
+All animation components are located in [src/components/ui/animate.tsx](mdc:src/components/ui/animate.tsx) and [src/components/ui/loading.tsx](mdc:src/components/ui/loading.tsx).
+
+### Key Animation Variants
+- **fadeInUp**: Fade in with upward motion and blur effect
+- **fadeInScale**: Scale animation with blur effect  
+- **slideInFromLeft/Right**: Slide animations with blur effect
+- **staggerContainer/Item**: Staggered animations for lists and groups
+
+### Reusable Animation Components
+- **PageTransition**: Wraps entire pages with fade/blur/scale transitions
+- **FadeInUp**: Individual elements with fade-up animation
+- **StaggerContainer/Item**: For animating groups of elements sequentially
+- **SlideInFromLeft/Right**: For side-to-side animations
+
+### Scroll-Triggered Animation Components
+- **ScrollFadeInUp**: Fade in with upward motion triggered by scroll
+- **ScrollFadeInScale**: Scale animation triggered by scroll
+- **ScrollSlideInFromLeft/Right**: Slide animations triggered by scroll
+- **ScrollStaggerContainer/Item**: Staggered animations triggered by scroll
+- **ParallaxScroll**: Parallax effect with customizable speed
+
+## Animation Implementation Rules
+
+### 1. Page-Level Animations
+Every page should be wrapped with `PageTransition`:
+```tsx
+import { PageTransition } from "@/components/ui/animate";
+
+export default function MyPage() {
+  return (
+    <PageTransition>
+      {/* Page content */}
+    </PageTransition>
+  );
+}
+```
+
+### 2. Staggered Content
+Use `StaggerContainer` and `StaggerItem` for sequential animations:
+```tsx
+import { StaggerContainer, StaggerItem } from "@/components/ui/animate";
+
+<StaggerContainer>
+  <StaggerItem>Content 1</StaggerItem>
+  <StaggerItem>Content 2</StaggerItem>
+  <StaggerItem>Content 3</StaggerItem>
+</StaggerContainer>
+```
+
+### 3. Loading States
+Use `LoadingButton` for interactive elements:
+```tsx
+import { LoadingButton } from "@/components/ui/loading";
+
+<LoadingButton
+  isLoading={loading}
+  loadingText="Loading..."
+  onClick={handleAction}
+>
+  Submit
+</LoadingButton>
+```
+
+### 4. Blur Effects
+All animations should include blur effects:
+- Initial state: `filter: "blur(4px-8px)"`
+- Animate state: `filter: "blur(0px)"`
+- Exit state: `filter: "blur(4px-8px)"`
+
+### 5. Scroll-Triggered Animations
+Use scroll-triggered animations for landing pages and content sections:
+```tsx
+import { ScrollFadeInUp, ScrollSlideInFromLeft, ParallaxScroll } from "@/components/ui/animate";
+
+<ScrollFadeInUp>
+  <div>Content that animates when scrolled into view</div>
+</ScrollFadeInUp>
+
+<ParallaxScroll speed={0.3}>
+  <div>Content with parallax effect</div>
+</ParallaxScroll>
+```
+
+## Animation Timing and Easing
+
+### Standard Timing
+- **Duration**: 0.5-0.6 seconds for most animations
+- **Easing**: `[0.25, 0.46, 0.45, 0.94]` (custom cubic-bezier)
+- **Stagger Delay**: 0.1 seconds between items
+
+### Performance Considerations
+- Use `transform` and `opacity` properties for smooth animations
+- Avoid animating layout properties (width, height, margin, padding)
+- Use `will-change: transform` for complex animations
+
+## Loading States Guidelines
+
+### LoadingButton Usage
+- Always show loading spinner during async operations
+- Disable button during loading state
+- Provide clear loading text
+- Support different variants (default, outline, ghost, destructive)
+
+### Loading Overlays
+- Use `LoadingOverlay` for page-level loading states
+- Include blur effect on background content
+- Show spinner with descriptive message
+
+## Animation Patterns by Page Type
+
+### Authentication Pages (Login, Register, Forgot Password)
+- PageTransition wrapper
+- StaggerContainer for form elements
+- LoadingButton for submit actions
+- Slide animations for form sections
+
+### Landing Pages (Homepage)
+- PageTransition wrapper
+- StaggerContainer for hero content
+- ScrollSlideInFromLeft/Right for feature sections
+- ScrollFadeInUp for headers and footers
+- ParallaxScroll for visual elements
+- ScrollStaggerContainer for final CTA sections
+
+### Content Pages
+- PageTransition wrapper
+- StaggerContainer for content blocks
+- FadeInUp for individual elements
+
+## Import Guidelines
+
+### Standard Imports
+```tsx
+import { 
+  PageTransition, 
+  FadeInUp, 
+  StaggerContainer, 
+  StaggerItem,
+  SlideInFromLeft,
+  SlideInFromRight,
+  ScrollFadeInUp,
+  ScrollSlideInFromLeft,
+  ScrollSlideInFromRight,
+  ScrollStaggerContainer,
+  ScrollStaggerItem,
+  ParallaxScroll
+} from "@/components/ui/animate";
+
+import { LoadingButton, LoadingOverlay } from "@/components/ui/loading";
+```
+
+## Animation Best Practices
+
+1. **Consistency**: Use the same animation patterns across similar components
+2. **Performance**: Keep animations under 0.6 seconds
+3. **Accessibility**: Respect `prefers-reduced-motion` settings
+4. **Blur Effects**: Always include blur for smooth, modern feel
+5. **Loading States**: Provide clear feedback during async operations
+6. **Staggering**: Use staggered animations for lists and groups
+7. **Page Transitions**: Wrap all pages with PageTransition
+
+## Common Animation Scenarios
+
+### Form Submissions
+- Use LoadingButton with spinner
+- Show loading text
+- Disable form during submission
+
+### Page Navigation
+- Wrap page content with PageTransition
+- Use stagger animations for content sections
+
+### Content Loading
+- Use LoadingOverlay for page-level loading
+- Use LoadingCard for component-level loading
+- Show skeleton states for better UX
+
+### Interactive Elements
+- Use hover animations (scale: 1.02)
+- Use tap animations (scale: 0.98)
+- Provide visual feedback for all interactions

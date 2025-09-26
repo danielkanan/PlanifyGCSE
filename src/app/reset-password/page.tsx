@@ -112,12 +112,9 @@ function ResetPasswordContent() {
         <div className="w-full max-w-md space-y-6">
           {/* Logo */}
           <div className="text-center">
-            <div className="flex items-center justify-center space-x-2 mb-8">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">P</span>
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-foreground">PlanifyGCSE</h1>
               </div>
-              <h1 className="text-3xl font-bold text-foreground">Planify</h1>
-            </div>
           </div>
 
           <Card className="w-full">
@@ -139,12 +136,9 @@ function ResetPasswordContent() {
         <div className="w-full max-w-md space-y-6">
           {/* Logo */}
           <div className="text-center">
-            <div className="flex items-center justify-center space-x-2 mb-8">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">P</span>
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-foreground">PlanifyGCSE</h1>
               </div>
-              <h1 className="text-3xl font-bold text-foreground">Planify</h1>
-            </div>
           </div>
 
           <Card className="w-full">
@@ -195,12 +189,9 @@ function ResetPasswordContent() {
         <div className="w-full max-w-md space-y-6">
           {/* Logo */}
           <div className="text-center">
-            <div className="flex items-center justify-center space-x-2 mb-8">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">P</span>
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-foreground">PlanifyGCSE</h1>
               </div>
-              <h1 className="text-3xl font-bold text-foreground">Planify</h1>
-            </div>
           </div>
 
           <Card className="w-full">
@@ -259,12 +250,9 @@ function ResetPasswordContent() {
       <div className="w-full max-w-md space-y-6">
         {/* Logo */}
         <div className="text-center">
-          <div className="flex items-center justify-center space-x-2 mb-8">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">P</span>
-            </div>
-            <h1 className="text-3xl font-bold text-foreground">Planify</h1>
-          </div>
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-foreground">PlanifyGCSE</h1>
+              </div>
         </div>
 
         {/* Header */}
@@ -374,12 +362,9 @@ export default function ResetPasswordPage() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-md space-y-6">
           <div className="text-center">
-            <div className="flex items-center justify-center space-x-2 mb-8">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">P</span>
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-foreground">PlanifyGCSE</h1>
               </div>
-              <h1 className="text-3xl font-bold text-foreground">Planify</h1>
-            </div>
           </div>
           <Card className="w-full">
             <CardContent className="pt-6">

@@ -8,6 +8,12 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { FirebaseError } from "firebase/app";
+import { 
+  PageTransition, 
+  StaggerContainer, 
+  StaggerItem
+} from "@/components/ui/animate";
+import { LoadingButton } from "@/components/ui/loading";
 
 export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
@@ -78,19 +84,20 @@ export default function ForgotPasswordPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="w-full max-w-md space-y-6">
-          {/* Logo */}
-          <div className="text-center">
-            <div className="flex items-center justify-center space-x-2 mb-8">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">P</span>
+      <PageTransition>
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+          <StaggerContainer className="w-full max-w-md space-y-6">
+            {/* Logo */}
+            <StaggerItem>
+              <div className="text-center">
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-foreground">PlanifyGCSE</h1>
               </div>
-              <h1 className="text-3xl font-bold text-foreground">Planify</h1>
-            </div>
-          </div>
+              </div>
+            </StaggerItem>
 
-          <Card className="w-full">
+            <StaggerItem>
+              <Card className="w-full">
             <CardHeader className="text-center space-y-2">
               <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mb-4">
                 <svg 
@@ -119,56 +126,61 @@ export default function ForgotPasswordPage() {
               <p className="text-center text-sm text-muted-foreground">
                 If you don&apos;t see the email in your inbox, please check your spam folder.
               </p>
-              <div className="space-y-3 pt-4">
-                <Button 
-                  onClick={() => router.push("/login")} 
-                  className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
-                >
-                  Back to Login
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    setSuccess(false);
-                    setEmail("");
-                  }}
-                  className="w-full h-12"
-                >
-                  Send another email
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                <div className="space-y-3 pt-4">
+                  <Button 
+                    onClick={() => router.push("/login")} 
+                    className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
+                  >
+                    Back to Login
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setSuccess(false);
+                      setEmail("");
+                    }}
+                    className="w-full h-12"
+                  >
+                    Send another email
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            </StaggerItem>
+          </StaggerContainer>
         </div>
-      </div>
+      </PageTransition>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
-        {/* Logo */}
-        <div className="text-center">
-          <div className="flex items-center justify-center space-x-2 mb-8">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">P</span>
+    <PageTransition>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <StaggerContainer className="w-full max-w-md space-y-6">
+          {/* Logo */}
+          <StaggerItem>
+            <div className="text-center">
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-foreground">PlanifyGCSE</h1>
+              </div>
             </div>
-            <h1 className="text-3xl font-bold text-foreground">Planify</h1>
-          </div>
-        </div>
+          </StaggerItem>
 
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <h2 className="text-2xl font-semibold text-foreground">
-            Forgot your password?
-          </h2>
-          <p className="text-muted-foreground">
-            Enter your email address and we&apos;ll send you a link to reset your password.
-          </p>
-        </div>
+          {/* Header */}
+          <StaggerItem>
+            <div className="text-center space-y-2">
+              <h2 className="text-2xl font-semibold text-foreground">
+                Forgot your password?
+              </h2>
+              <p className="text-muted-foreground">
+                Enter your email address and we&apos;ll send you a link to reset your password.
+              </p>
+            </div>
+          </StaggerItem>
 
-        {/* Reset Form */}
-        <Card className="w-full">
+          {/* Reset Form */}
+          <StaggerItem>
+            <Card className="w-full">
           <CardContent className="pt-6">
             <form className="space-y-4" onSubmit={handlePasswordReset}>
               {error && (
@@ -200,40 +212,45 @@ export default function ForgotPasswordPage() {
                 />
               </div>
 
-              <Button 
+              <LoadingButton
                 type="submit" 
                 className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
-                disabled={loading}
+                isLoading={loading}
+                loadingText="Sending..."
               >
-                {loading ? "Sending..." : "Send reset link"}
-              </Button>
+                Send reset link
+              </LoadingButton>
             </form>
           </CardContent>
         </Card>
+          </StaggerItem>
 
-        {/* Back to Login */}
-        <div className="text-center">
-          <Link 
-            href="/login" 
-            className="text-primary hover:underline text-sm inline-flex items-center gap-2"
-          >
-            <svg 
-              className="w-4 h-4" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M10 19l-7-7m0 0l7-7m-7 7h18" 
-              />
-            </svg>
-            Back to login
-          </Link>
-        </div>
+          {/* Back to Login */}
+          <StaggerItem>
+            <div className="text-center">
+              <Link 
+                href="/login" 
+                className="text-primary hover:underline text-sm inline-flex items-center gap-2"
+              >
+                <svg 
+                  className="w-4 h-4" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18" 
+                  />
+                </svg>
+                Back to login
+              </Link>
+            </div>
+          </StaggerItem>
+        </StaggerContainer>
       </div>
-    </div>
+    </PageTransition>
   );
 }

@@ -1,0 +1,311 @@
+---
+globs: src/app/**/*.tsx
+description: Animation patterns and implementation guidelines for different page types
+---
+
+# Animation Patterns by Page Type
+
+## Authentication Pages Pattern
+
+### Files: Login, Register, Forgot Password
+- [src/app/login/page.tsx](mdc:src/app/login/page.tsx)
+- [src/app/register/page.tsx](mdc:src/app/register/page.tsx)
+- [src/app/forgot-password/page.tsx](mdc:src/app/forgot-password/page.tsx)
+
+### Standard Pattern:
+```tsx
+"use client";
+
+import { 
+  PageTransition, 
+  StaggerContainer, 
+  StaggerItem
+} from "@/components/ui/animate";
+import { LoadingButton } from "@/components/ui/loading";
+
+export default function AuthPage() {
+  return (
+    <PageTransition>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <StaggerContainer className="w-full max-w-md space-y-6">
+          <StaggerItem>
+            {/* Logo */}
+          </StaggerItem>
+          <StaggerItem>
+            {/* Header */}
+          </StaggerItem>
+          <StaggerItem>
+            {/* Form */}
+          </StaggerItem>
+        </StaggerContainer>
+      </div>
+    </PageTransition>
+  );
+}
+```
+
+### Key Elements:
+- **PageTransition** wrapper for page-level animation
+- **StaggerContainer** for sequential form element animations
+- **LoadingButton** for form submissions
+- **StaggerItem** wrapping each major section
+
+## Landing Page Pattern
+
+### File: Homepage
+- [src/app/page.tsx](mdc:src/app/page.tsx)
+
+### Standard Pattern:
+```tsx
+"use client";
+
+import { 
+  PageTransition, 
+  FadeInUp, 
+  StaggerContainer, 
+  StaggerItem,
+  SlideInFromLeft,
+  SlideInFromRight 
+} from "@/components/ui/animate";
+
+export default function HomePage() {
+  return (
+    <PageTransition>
+      <div className="min-h-screen bg-background">
+        <FadeInUp>
+          {/* Header */}
+        </FadeInUp>
+        
+        <StaggerContainer>
+          <StaggerItem>
+            {/* Hero Section */}
+          </StaggerItem>
+        </StaggerContainer>
+        
+        <div className="grid md:grid-cols-2">
+          <SlideInFromLeft>
+            {/* Content */}
+          </SlideInFromLeft>
+          <SlideInFromRight>
+            {/* Content */}
+          </SlideInFromRight>
+        </div>
+        
+        <FadeInUp>
+          {/* Footer */}
+        </FadeInUp>
+      </div>
+    </PageTransition>
+  );
+}
+```
+
+### Key Elements:
+- **PageTransition** wrapper
+- **FadeInUp** for header and footer
+- **StaggerContainer/Item** for hero content
+- **SlideInFromLeft/Right** for feature sections
+- **Grid layouts** with alternating slide directions
+
+## Content Page Pattern
+
+### Standard Pattern for Content Pages:
+```tsx
+"use client";
+
+import { 
+  PageTransition, 
+  StaggerContainer, 
+  StaggerItem,
+  FadeInUp
+} from "@/components/ui/animate";
+
+export default function ContentPage() {
+  return (
+    <PageTransition>
+      <div className="min-h-screen bg-background">
+        <FadeInUp>
+          {/* Page Header */}
+        </FadeInUp>
+        
+        <StaggerContainer>
+          <StaggerItem>
+            {/* Content Section 1 */}
+          </StaggerItem>
+          <StaggerItem>
+            {/* Content Section 2 */}
+          </StaggerItem>
+          <StaggerItem>
+            {/* Content Section 3 */}
+          </StaggerItem>
+        </StaggerContainer>
+      </div>
+    </PageTransition>
+  );
+}
+```
+
+## Form Animation Patterns
+
+### Form with Loading States:
+```tsx
+import { LoadingButton } from "@/components/ui/loading";
+
+<form onSubmit={handleSubmit}>
+  <div className="space-y-4">
+    {/* Form fields */}
+  </div>
+  
+  <LoadingButton
+    type="submit"
+    isLoading={loading}
+    loadingText="Submitting..."
+  >
+    Submit
+  </LoadingButton>
+</form>
+```
+
+### Form with Error States:
+```tsx
+{error && (
+  <motion.div
+    initial={{ opacity: 0, y: -10 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="error-message"
+  >
+    {error}
+  </motion.div>
+)}
+```
+
+## Loading State Patterns
+
+### Page-Level Loading:
+```tsx
+import { LoadingOverlay } from "@/components/ui/loading";
+
+<LoadingOverlay isLoading={loading} message="Loading data...">
+  <div>Page content</div>
+</LoadingOverlay>
+```
+
+### Component-Level Loading:
+```tsx
+import { LoadingCard } from "@/components/ui/loading";
+
+<LoadingCard isLoading={loading}>
+  <div>Card content</div>
+</LoadingCard>
+```
+
+### Button Loading States:
+```tsx
+import { LoadingButton } from "@/components/ui/loading";
+
+<LoadingButton
+  isLoading={loading}
+  loadingText="Processing..."
+  onClick={handleAction}
+>
+  Action
+</LoadingButton>
+```
+
+## Navigation Animation Patterns
+
+### Page Transitions:
+- Always wrap page content with `PageTransition`
+- Use consistent timing (0.6s duration)
+- Include blur effects for smooth transitions
+
+### Link Hover Effects:
+```tsx
+<motion.a
+  whileHover={{ scale: 1.02 }}
+  whileTap={{ scale: 0.98 }}
+  href="/path"
+>
+  Link Text
+</motion.a>
+```
+
+## Responsive Animation Considerations
+
+### Mobile-First Approach:
+- Reduce animation complexity on mobile
+- Use shorter durations for touch interactions
+- Consider performance implications
+
+### Breakpoint-Specific Animations:
+```tsx
+<motion.div
+  initial={{ opacity: 0, x: -30 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{
+    duration: 0.5,
+    delay: window.innerWidth > 768 ? 0.2 : 0
+  }}
+>
+  Content
+</motion.div>
+```
+
+## Accessibility Considerations
+
+### Reduced Motion Support:
+```tsx
+const prefersReducedMotion = useReducedMotion();
+
+<motion.div
+  animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+  transition={prefersReducedMotion ? {} : { duration: 0.5 }}
+>
+  Content
+</motion.div>
+```
+
+### Focus Management:
+- Ensure animations don't interfere with focus
+- Provide alternative text for loading states
+- Maintain keyboard navigation during animations
+
+## Performance Best Practices
+
+### Animation Optimization:
+- Use `transform` and `opacity` properties
+- Avoid animating layout properties
+- Implement proper cleanup
+- Consider `will-change` for complex animations
+
+### Code Splitting:
+- Lazy load animation components when possible
+- Use dynamic imports for heavy animation libraries
+- Implement proper error boundaries
+
+## Common Animation Scenarios
+
+### 1. Page Load
+- Use `PageTransition` wrapper
+- Implement staggered content reveals
+- Include blur effects for smooth transitions
+
+### 2. Form Submission
+- Use `LoadingButton` with spinner
+- Show loading text
+- Disable form during submission
+
+### 3. Content Loading
+- Use `LoadingOverlay` for page-level loading
+- Use `LoadingCard` for component-level loading
+- Show skeleton states for better UX
+
+### 4. Interactive Elements
+- Use hover animations (scale: 1.02)
+- Use tap animations (scale: 0.98)
+- Provide visual feedback for all interactions
+
+### 5. Error States
+- Animate error messages with slide-in effect
+- Use appropriate colors and icons
+- Provide clear recovery actions

@@ -1,0 +1,203 @@
+---
+globs: src/components/ui/animate.tsx,src/components/ui/loading.tsx
+description: Detailed guide for animation component usage and customization
+---
+
+# Animation Components Reference
+
+## Core Animation Components
+
+### PageTransition
+Wraps entire pages with smooth fade/blur/scale transitions.
+
+**Usage:**
+```tsx
+<PageTransition>
+  <div>Page content</div>
+</PageTransition>
+```
+
+**Props:**
+- `className?: string` - Additional CSS classes
+- `children: ReactNode` - Page content
+
+### StaggerContainer & StaggerItem
+Creates sequential animations for groups of elements.
+
+**Usage:**
+```tsx
+<StaggerContainer>
+  <StaggerItem>Item 1</StaggerItem>
+  <StaggerItem>Item 2</StaggerItem>
+  <StaggerItem>Item 3</StaggerItem>
+</StaggerContainer>
+```
+
+**Props:**
+- `className?: string` - Additional CSS classes
+- `children: ReactNode` - Content to animate
+
+### Individual Animation Components
+
+#### FadeInUp
+Fades in with upward motion and blur effect.
+
+#### FadeInScale
+Scales in with blur effect.
+
+#### SlideInFromLeft/Right
+Slides in from left or right with blur effect.
+
+**Usage:**
+```tsx
+<FadeInUp className="custom-class">
+  <div>Content</div>
+</FadeInUp>
+```
+
+## Loading Components
+
+### LoadingButton
+Enhanced button with loading states and animations.
+
+**Props:**
+- `isLoading: boolean` - Loading state
+- `children: ReactNode` - Button content
+- `loadingText?: string` - Text shown during loading
+- `disabled?: boolean` - Disabled state
+- `className?: string` - Additional CSS classes
+- `onClick?: () => void` - Click handler
+- `variant?: "default" | "outline" | "ghost" | "destructive"` - Button variant
+- `type?: "button" | "submit" | "reset"` - Button type
+
+**Usage:**
+```tsx
+<LoadingButton
+  isLoading={loading}
+  loadingText="Saving..."
+  onClick={handleSave}
+  variant="outline"
+>
+  Save Changes
+</LoadingButton>
+```
+
+### LoadingOverlay
+Overlay component with blur effect for page-level loading.
+
+**Props:**
+- `isLoading: boolean` - Loading state
+- `children: ReactNode` - Content to overlay
+- `message?: string` - Loading message
+- `blur?: boolean` - Enable blur effect
+
+**Usage:**
+```tsx
+<LoadingOverlay isLoading={loading} message="Loading data...">
+  <div>Page content</div>
+</LoadingOverlay>
+```
+
+### LoadingCard
+Card component with skeleton loading state.
+
+**Props:**
+- `isLoading: boolean` - Loading state
+- `children: ReactNode` - Card content
+- `skeleton?: ReactNode` - Custom skeleton
+
+**Usage:**
+```tsx
+<LoadingCard isLoading={loading}>
+  <div>Card content</div>
+</LoadingCard>
+```
+
+### LoadingPage
+Full-page loading component with animated spinner.
+
+**Props:**
+- `message?: string` - Loading message
+- `showSpinner?: boolean` - Show/hide spinner
+
+**Usage:**
+```tsx
+<LoadingPage message="Loading your revision plan..." />
+```
+
+## Animation Variants
+
+### fadeInUp
+- **Initial**: `opacity: 0, y: 20, filter: "blur(4px)"`
+- **Animate**: `opacity: 1, y: 0, filter: "blur(0px)"`
+- **Exit**: `opacity: 0, y: -20, filter: "blur(4px)"`
+- **Duration**: 0.6s
+- **Easing**: Custom cubic-bezier
+
+### fadeInScale
+- **Initial**: `opacity: 0, scale: 0.95, filter: "blur(8px)"`
+- **Animate**: `opacity: 1, scale: 1, filter: "blur(0px)"`
+- **Exit**: `opacity: 0, scale: 0.95, filter: "blur(8px)"`
+- **Duration**: 0.5s
+
+### slideInFromLeft/Right
+- **Initial**: `opacity: 0, x: ±30, filter: "blur(6px)"`
+- **Animate**: `opacity: 1, x: 0, filter: "blur(0px)"`
+- **Exit**: `opacity: 0, x: ±30, filter: "blur(6px)"`
+- **Duration**: 0.5s
+
+### staggerContainer
+- **Initial**: `{}`
+- **Animate**: `staggerChildren: 0.1, delayChildren: 0.1`
+
+### staggerItem
+- **Initial**: `opacity: 0, y: 20, filter: "blur(4px)"`
+- **Animate**: `opacity: 1, y: 0, filter: "blur(0px)"`
+- **Duration**: 0.5s
+
+## Utility Components
+
+### LoadingSpinner
+Animated spinner component.
+
+**Props:**
+- `size?: "sm" | "md" | "lg"` - Spinner size
+
+**Usage:**
+```tsx
+<LoadingSpinner size="lg" />
+```
+
+### Pulse
+Pulsing animation wrapper.
+
+**Props:**
+- `children: ReactNode` - Content to pulse
+- `className?: string` - Additional CSS classes
+
+**Usage:**
+```tsx
+<Pulse>
+  <div>Pulsing content</div>
+</Pulse>
+```
+
+## Customization Guidelines
+
+### Adding New Animation Variants
+1. Define variant in [src/components/ui/animate.tsx](mdc:src/components/ui/animate.tsx)
+2. Include blur effects for consistency
+3. Use appropriate timing and easing
+4. Export as reusable component
+
+### Creating Custom Loading States
+1. Extend existing loading components
+2. Maintain consistent styling
+3. Include proper accessibility attributes
+4. Test with different content sizes
+
+### Performance Optimization
+- Use `transform` and `opacity` for animations
+- Avoid animating layout properties
+- Implement proper cleanup for complex animations
+- Consider `will-change` for performance-critical animations

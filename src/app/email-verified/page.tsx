@@ -10,12 +10,9 @@ export default function EmailVerifiedPage() {
       <div className="w-full max-w-md space-y-6">
         {/* Logo */}
         <div className="text-center">
-          <div className="flex items-center justify-center space-x-2 mb-8">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">P</span>
-            </div>
-            <h1 className="text-3xl font-bold text-foreground">Planify</h1>
-          </div>
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-foreground">PlanifyGCSE</h1>
+              </div>
         </div>
 
         <Card className="w-full">
@@ -41,7 +38,7 @@ export default function EmailVerifiedPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-center text-muted-foreground">
-              Your email address has been verified. You can now access all PlanifyGCSE features and start building your personalized revision plan.
+              Your email address has been verified. You can now access all PlanifyGCSEGCSE features and start building your personalized revision plan.
             </p>
             <div className="space-y-3 pt-4">
               <Button 
@@ -49,7 +46,7 @@ export default function EmailVerifiedPage() {
                 className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
               >
                 <Link href="/">
-                  Get Started with PlanifyGCSE
+                  Get Started with PlanifyGCSEGCSE
                 </Link>
               </Button>
               <Button 
