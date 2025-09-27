@@ -1,25 +1,26 @@
 "use client";
 
-import type { Metadata } from "next";
 import Link from "next/link";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signInWithGoogle, signInWithMicrosoft, signInWithEmail } from "@/lib/auth";
+import { signInWithGoogle, signInWithMicrosoft, signInWithEmail, hasCompletedOnboarding } from "@/lib/auth";
 import { validateEmail, validatePassword, sanitizeInput } from "@/lib/validation";
 import { useRouter } from "next/navigation";
 import { 
   PageTransition, 
-  FadeInUp, 
   StaggerContainer, 
   StaggerItem
 } from "@/components/ui/animate";
-import { LoadingOverlay, LoadingButton } from "@/components/ui/loading";
+import { LoadingButton } from "@/components/ui/loading";
 
 
 export default function LoginPage() {
-  const [loading, setLoading] = useState(false);
+  const [loadingStates, setLoadingStates] = useState({
+    google: false,
+    microsoft: false,
+    email: false
+  });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
@@ -27,25 +28,35 @@ export default function LoginPage() {
 
   const handleGoogleSignIn = async () => {
     try {
-      setLoading(true);
-      await signInWithGoogle();
-      router.push("/");
+      setLoadingStates(prev => ({ ...prev, google: true }));
+      const result = await signInWithGoogle();
+      const onboardingCompleted = await hasCompletedOnboarding(result.user);
+      
+      // Wait a moment for auth state to update
+      setTimeout(() => {
+        router.push(onboardingCompleted ? "/my-plan" : "/create-plan/subjects");
+      }, 100);
     } catch (error) {
       console.error("Google sign-in failed:", error);
     } finally {
-      setLoading(false);
+      setLoadingStates(prev => ({ ...prev, google: false }));
     }
   };
 
   const handleMicrosoftSignIn = async () => {
     try {
-      setLoading(true);
-      await signInWithMicrosoft();
-      router.push("/");
+      setLoadingStates(prev => ({ ...prev, microsoft: true }));
+      const result = await signInWithMicrosoft();
+      const onboardingCompleted = await hasCompletedOnboarding(result.user);
+      
+      // Wait a moment for auth state to update
+      setTimeout(() => {
+        router.push(onboardingCompleted ? "/my-plan" : "/create-plan/subjects");
+      }, 100);
     } catch (error) {
       console.error("Microsoft sign-in failed:", error);
     } finally {
-      setLoading(false);
+      setLoadingStates(prev => ({ ...prev, microsoft: false }));
     }
   };
 
@@ -68,17 +79,22 @@ export default function LoginPage() {
     }
     
     try {
-      setLoading(true);
+      setLoadingStates(prev => ({ ...prev, email: true }));
       const sanitizedEmail = sanitizeInput(email);
-      await signInWithEmail(sanitizedEmail, password);
-      router.push("/");
+      const result = await signInWithEmail(sanitizedEmail, password);
+      const onboardingCompleted = await hasCompletedOnboarding(result.user);
+      
+      // Wait a moment for auth state to update
+      setTimeout(() => {
+        router.push(onboardingCompleted ? "/my-plan" : "/create-plan/subjects");
+      }, 100);
     } catch (error) {
       console.error("Email sign-in failed:", error);
       setErrors({ 
         email: "Invalid email or password. Please try again." 
       });
     } finally {
-      setLoading(false);
+      setLoadingStates(prev => ({ ...prev, email: false }));
     }
   };
 
@@ -117,7 +133,7 @@ export default function LoginPage() {
                 variant="outline" 
                 className="w-full h-12 flex items-center justify-center gap-3 text-foreground border-input hover:bg-accent"
                 onClick={handleGoogleSignIn}
-                isLoading={loading}
+                isLoading={loadingStates.google}
                 loadingText="Signing in..."
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -145,7 +161,7 @@ export default function LoginPage() {
                 variant="outline" 
                 className="w-full h-12 flex items-center justify-center gap-3 text-foreground border-input hover:bg-accent"
                 onClick={handleMicrosoftSignIn}
-                isLoading={loading}
+                isLoading={loadingStates.microsoft}
                 loadingText="Signing in..."
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -183,7 +199,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  disabled={loading}
+                  disabled={loadingStates.email}
                 />
                 {errors.email && (
                   <p className="text-sm text-red-500">{errors.email}</p>
@@ -202,7 +218,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  disabled={loading}
+                  disabled={loadingStates.email}
                 />
                 {errors.password && (
                   <p className="text-sm text-red-500">{errors.password}</p>
@@ -212,7 +228,7 @@ export default function LoginPage() {
               <LoadingButton
                 type="submit" 
                 className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
-                isLoading={loading}
+                isLoading={loadingStates.email}
                 loadingText="Signing in..."
               >
                 Login

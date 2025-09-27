@@ -1,19 +1,28 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PageTransition, FadeInUp, StaggerContainer, StaggerItem } from "@/components/ui/animate";
+import { LoadingOverlay } from "@/components/ui/loading";
+import { useAuth } from "@/contexts/AuthContext";
 import { examBoards } from "@/lib/subject-data";
-import { useRouter } from "next/navigation";
-import { Sun, BarChart3, Flag, Calendar, Dna, FlaskConical, Atom, Microscope } from "lucide-react";
+import { Sun, BarChart3, Flag, Dna, FlaskConical, Atom, Microscope } from "lucide-react";
 
 export default function DashboardPage() {
+  const { user, loading } = useAuth();
   const router = useRouter();
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [userName, setUserName] = useState<string>("Daniel");
 
   useEffect(() => {
+    // Redirect to login if not authenticated
+    if (!loading && !user) {
+      router.push('/login');
+      return;
+    }
+
     // Load data from localStorage
     const savedSubjects = localStorage.getItem('selectedSubjects');
     if (savedSubjects) {
@@ -21,9 +30,23 @@ export default function DashboardPage() {
     }
     
     // Get user name from auth context or localStorage
-    const savedUserName = localStorage.getItem('userName') || 'Daniel';
+    const savedUserName = localStorage.getItem('userName') || user?.displayName || 'User';
     setUserName(savedUserName);
-  }, []);
+  }, [user, loading, router]);
+
+  // Show loading overlay while checking authentication
+  if (loading) {
+    return (
+      <LoadingOverlay isLoading={true} message="Loading your plan...">
+        <div className="min-h-screen bg-background" />
+      </LoadingOverlay>
+    );
+  }
+
+  // Don't render anything if not authenticated (will redirect)
+  if (!user) {
+    return null;
+  }
 
   const getIconComponent = (iconName: string) => {
     const iconMap = {
@@ -149,7 +172,7 @@ export default function DashboardPage() {
                 <FadeInUp>
                   <div className="mt-8 p-4 bg-muted/30 rounded-lg">
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      <strong>PlanifyGCSE's Reflective Revision Planner is currently in beta.</strong> We cannot guarantee the accuracy of the exam boards, modules, topics and content listed for your GCSE subjects. Please verify that the topics we have listed cover the curriculum for each of your subjects. If you find any mistakes, please use the 'Report a Problem' button so PlanifyGCSE can fix them.
+                      <strong>PlanifyGCSE&apos;s Reflective Revision Planner is currently in beta.</strong> We cannot guarantee the accuracy of the exam boards, modules, topics and content listed for your GCSE subjects. Please verify that the topics we have listed cover the curriculum for each of your subjects. If you find any mistakes, please use the &apos;Report a Problem&apos; button so PlanifyGCSE can fix them.
                     </p>
                   </div>
                 </FadeInUp>

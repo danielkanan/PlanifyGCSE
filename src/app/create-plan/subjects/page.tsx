@@ -4,22 +4,56 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PageTransition, FadeInUp, StaggerContainer, StaggerItem } from "@/components/ui/animate";
+import { LoadingOverlay } from "@/components/ui/loading";
+import { useAuth } from "@/contexts/AuthContext";
+import { hasCompletedOnboarding } from "@/lib/auth";
 import { getAllSubjects } from "@/lib/subject-data";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Plus, Dna, FlaskConical, Atom, Microscope } from "lucide-react";
+import { Plus, Dna, FlaskConical, Atom, Microscope } from "lucide-react";
 
 export default function SubjectsPage() {
+  const { user, loading } = useAuth();
   const router = useRouter();
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const subjects = getAllSubjects();
 
   useEffect(() => {
+    // Redirect to login if not authenticated
+    if (!loading && !user) {
+      router.push('/login');
+      return;
+    }
+
+    // Check if user has already completed onboarding
+    if (user) {
+      hasCompletedOnboarding(user).then((completed) => {
+        if (completed) {
+          router.push('/my-plan');
+          return;
+        }
+      });
+    }
+
     // Load saved subject selections from localStorage
     const saved = localStorage.getItem('selectedSubjects');
     if (saved) {
       setSelectedSubjects(JSON.parse(saved));
     }
-  }, []);
+  }, [user, loading, router]);
+
+  // Show loading overlay while checking authentication
+  if (loading) {
+    return (
+      <LoadingOverlay isLoading={true} message="Loading subjects...">
+        <div className="min-h-screen bg-background" />
+      </LoadingOverlay>
+    );
+  }
+
+  // Don't render anything if not authenticated (will redirect)
+  if (!user) {
+    return null;
+  }
 
   const handleSubjectToggle = (subjectId: string) => {
     const newSelection = selectedSubjects.includes(subjectId) 
@@ -41,7 +75,7 @@ export default function SubjectsPage() {
   };
 
   const handleContinue = () => {
-    router.push('/onboarding/exam-boards');
+    router.push('/create-plan/exam-boards');
   };
 
   return (
@@ -59,7 +93,7 @@ export default function SubjectsPage() {
                   What subjects are you studying?
                 </h2>
                 <p className="text-muted-foreground">
-                  Select the subjects that you'd like to include as part of your revision timetable.
+                  Select the subjects that you&apos;d like to include as part of your revision timetable.
                 </p>
               </div>
             </div>

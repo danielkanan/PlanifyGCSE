@@ -3,13 +3,13 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
+import { UserDropdown } from "@/components/ui/user-dropdown";
 import { 
   PageTransition, 
   FadeInUp, 
   StaggerContainer, 
   StaggerItem,
-  SlideInFromLeft,
-  SlideInFromRight,
   ScrollFadeInUp,
   ScrollSlideInFromLeft,
   ScrollSlideInFromRight,
@@ -18,30 +18,40 @@ import {
 } from "@/components/ui/animate";
 
 export default function HomePage() {
+  const { user, loading } = useAuth();
+
   return (
     <PageTransition>
       <div className="min-h-screen bg-background">
       {/* Header Navigation */}
       <FadeInUp>
         <header className="border-b bg-card">
-          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="container mx-auto px-4 h-18 flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <span className="font-bold text-xl text-foreground">PlanifyGCSE</span>
+              <span className="font-bold text-2xl text-foreground">PlanifyGCSE</span>
             </div>
             <div className="flex items-center space-x-3">
-              <Link href="/login">
-                <Button variant="ghost" size="sm">Sign In</Button>
-              </Link>
-              <Link href="/register">
-                <Button size="sm">Get Started</Button>
-              </Link>
+              {!loading && (
+                user ? (
+                  <UserDropdown user={user} />
+                ) : (
+                  <>
+                    <Link href="/login">
+                      <Button variant="ghost" size="sm">Sign In</Button>
+                    </Link>
+                    <Link href="/register">
+                      <Button size="sm">Get Started</Button>
+                    </Link>
+                  </>
+                )
+              )}
             </div>
           </div>
         </header>
       </FadeInUp>
 
       {/* Hero Section */}
-      <section className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-background via-muted/30 to-muted/60 px-4 flex items-center justify-center">
+      <section className="min-h-[calc(100vh-4.5rem)] bg-gradient-to-b from-background via-muted/30 to-muted/60 px-4 flex items-center justify-center">
         <StaggerContainer className="container mx-auto text-center max-w-4xl">
           <StaggerItem>
             <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
@@ -56,16 +66,27 @@ export default function HomePage() {
           </StaggerItem>
           <StaggerItem>
             <div className="flex flex-col gap-4 justify-center items-center">
-              <Link href="/register">
-                <Button 
-                  size="lg" 
-                  className="px-8 py-4 text-base font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                >
-                  Build a Revision Plan
-                </Button>
-              </Link>
+              {user ? (
+                <Link href="/my-plan">
+                  <Button 
+                    size="lg" 
+                    className="px-8 py-4 text-base font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                  >
+                    Go to My Plan
+                  </Button>
+                </Link>
+              ) : (
+                <Link href="/register">
+                  <Button 
+                    size="lg" 
+                    className="px-8 py-4 text-base font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                  >
+                    Build a Revision Plan
+                  </Button>
+                </Link>
+              )}
               <p className="text-sm text-muted-foreground">
-                It&apos;s completely free. See how it works below!
+                {user ? "Continue working on your revision plan" : "It's completely free. See how it works below!"}
               </p>
             </div>
           </StaggerItem>
@@ -266,16 +287,27 @@ export default function HomePage() {
           </ScrollStaggerItem>
           <ScrollStaggerItem>
             <div className="flex flex-col gap-4 justify-center items-center">
-              <Link href="/register">
-                <Button 
-                  size="lg" 
-                  className="px-10 py-4 text-lg font-bold bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:from-primary/95 hover:via-primary/85 hover:to-primary/75 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-2 border-primary/20 hover:border-primary/40"
-                >
-                  Build a Revision Plan
-                </Button>
-              </Link>
+              {user ? (
+                <Link href="/my-plan">
+                  <Button 
+                    size="lg" 
+                    className="px-10 py-4 text-lg font-bold bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:from-primary/95 hover:via-primary/85 hover:to-primary/75 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-2 border-primary/20 hover:border-primary/40"
+                  >
+                    Go to My Plan
+                  </Button>
+                </Link>
+              ) : (
+                <Link href="/register">
+                  <Button 
+                    size="lg" 
+                    className="px-10 py-4 text-lg font-bold bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:from-primary/95 hover:via-primary/85 hover:to-primary/75 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-2 border-primary/20 hover:border-primary/40"
+                  >
+                    Build a Revision Plan
+                  </Button>
+                </Link>
+              )}
               <p className="text-sm text-muted-foreground font-medium">
-                Start your journey to exam success today
+                {user ? "Continue working on your revision plan" : "Start your journey to exam success today"}
               </p>
             </div>
           </ScrollStaggerItem>
@@ -283,27 +315,39 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <ScrollFadeInUp>
-        <footer className="border-t bg-gradient-to-b from-muted/40 via-card to-card py-12">
-          <div className="container mx-auto px-4">
-            <div className="text-center space-y-6">
+        <footer className="border-t bg-gradient-to-b from-muted/40 via-card to-card py-14">
+        <div className="container mx-auto px-4">
+            <div className="text-center space-y-7">
               <div className="flex items-center justify-center space-x-2">
-                <span className="font-bold text-xl text-foreground">PlanifyGCSE</span>
+                <span className="font-bold text-2xl text-foreground">PlanifyGCSE</span>
               </div>
-              <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                Helping students structure a high-quality individualised 
-                approach to exam revision.
-              </p>
-            </div>
-            
-            <div className="border-t mt-8 pt-8 text-center">
-              <p className="text-sm text-muted-foreground">
-                © 2025 PlanifyGCSE. All rights reserved.
-              </p>
-            </div>
+              <p className="text-base text-muted-foreground max-w-md mx-auto">
+              Helping students structure a high-quality individualised 
+              approach to exam revision.
+            </p>
           </div>
-        </footer>
-      </ScrollFadeInUp>
+          
+            <div className="border-t mt-9 pt-9 text-center">
+              <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-7 mb-4">
+                <Link 
+                  href="/privacy-policy" 
+                  className="text-base text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Privacy Policy
+                </Link>
+                <Link 
+                  href="/terms-of-service" 
+                  className="text-base text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Terms of Service
+                </Link>
+              </div>
+              <p className="text-base text-muted-foreground">
+              © 2025 PlanifyGCSE. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
       </div>
     </PageTransition>
   );

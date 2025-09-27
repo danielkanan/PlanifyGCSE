@@ -1,15 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PageTransition, FadeInUp, StaggerContainer, StaggerItem } from "@/components/ui/animate";
+import { LoadingOverlay } from "@/components/ui/loading";
+import { useAuth } from "@/contexts/AuthContext";
+import { hasCompletedOnboarding } from "@/lib/auth";
 import { motion, AnimatePresence } from "framer-motion";
-import { examBoards, getTopicsBySubjectAndBoard } from "@/lib/subject-data";
+import { examBoards } from "@/lib/subject-data";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronDown, ChevronUp, Check, X, Dna, FlaskConical, Atom, Microscope } from "lucide-react";
+import { ChevronLeft, ChevronDown, ChevronUp, Check } from "lucide-react";
 
 export default function TopicsPage() {
+  const { user, loading } = useAuth();
   const router = useRouter();
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [examBoardSelections, setExamBoardSelections] = useState<Record<string, string>>({});
@@ -17,7 +21,31 @@ export default function TopicsPage() {
   const [selectedTopics, setSelectedTopics] = useState<Record<string, string[]>>({});
   const [currentSubjectIndex, setCurrentSubjectIndex] = useState<number>(0);
 
+  const getSubjectData = useCallback((subjectId: string) => {
+    const examBoardId = examBoardSelections[subjectId];
+    if (!examBoardId) return null;
+    
+    const board = examBoards.find(b => b.id === examBoardId);
+    return board?.subjects.find(s => s.id === subjectId);
+  }, [examBoardSelections]);
+
   useEffect(() => {
+    // Redirect to login if not authenticated
+    if (!loading && !user) {
+      router.push('/login');
+      return;
+    }
+
+    // Check if user has already completed onboarding
+    if (user) {
+      hasCompletedOnboarding(user).then((completed) => {
+        if (completed) {
+          router.push('/my-plan');
+          return;
+        }
+      });
+    }
+
     // Load data from localStorage
     const savedSubjects = localStorage.getItem('selectedSubjects');
     const savedExamBoards = localStorage.getItem('examBoardSelections');
@@ -32,7 +60,7 @@ export default function TopicsPage() {
     if (savedTopics) {
       setSelectedTopics(JSON.parse(savedTopics));
     }
-  }, []);
+  }, [user, loading, router]);
 
   // Auto-select all subtopics when subjects and exam boards are loaded (only if no saved topics)
   useEffect(() => {
@@ -53,7 +81,21 @@ export default function TopicsPage() {
       
       setSelectedTopics(newSelectedTopics);
     }
-  }, [selectedSubjects.length, Object.keys(examBoardSelections).length, Object.keys(selectedTopics).length]);
+  }, [selectedSubjects, examBoardSelections, selectedTopics, getSubjectData]);
+
+  // Show loading overlay while checking authentication
+  if (loading) {
+    return (
+      <LoadingOverlay isLoading={true} message="Loading topics...">
+        <div className="min-h-screen bg-background" />
+      </LoadingOverlay>
+    );
+  }
+
+  // Don't render anything if not authenticated (will redirect)
+  if (!user) {
+    return null;
+  }
 
   const toggleTopicExpansion = (subjectId: string, topicId: string) => {
     const key = `${subjectId}-${topicId}`;
@@ -110,8 +152,8 @@ export default function TopicsPage() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }, 100);
     } else {
-      // Go to dashboard
-      router.push('/dashboard');
+      // Go to my-plan
+      router.push('/my-plan');
     }
   };
 
@@ -127,23 +169,7 @@ export default function TopicsPage() {
     }
   };
 
-  const getIconComponent = (iconName: string) => {
-    const iconMap = {
-      Dna,
-      FlaskConical,
-      Atom,
-      Microscope
-    };
-    return iconMap[iconName as keyof typeof iconMap] || Dna;
-  };
 
-  const getSubjectData = (subjectId: string) => {
-    const examBoardId = examBoardSelections[subjectId];
-    if (!examBoardId) return null;
-    
-    const board = examBoards.find(b => b.id === examBoardId);
-    return board?.subjects.find(s => s.id === subjectId);
-  };
 
   const getCurrentSubject = () => {
     if (currentSubjectIndex >= selectedSubjects.length) return null;
@@ -199,7 +225,7 @@ export default function TopicsPage() {
                   </AnimatePresence>
                 </h2>
                 <p className="text-muted-foreground">
-                  Since you're in Year 11 and this subject does not have optional modules, we've auto-selected all topics. You can adjust this as required.
+                  Since you&apos;re in Year 11 and this subject does not have optional modules, we&apos;ve auto-selected all topics. You can adjust this as required.
                 </p>
               </div>
             </div>

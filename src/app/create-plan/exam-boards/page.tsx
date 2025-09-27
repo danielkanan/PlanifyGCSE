@@ -4,16 +4,36 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PageTransition, FadeInUp, StaggerContainer, StaggerItem } from "@/components/ui/animate";
-import { examBoards, getSubjectsByExamBoard } from "@/lib/subject-data";
+import { LoadingOverlay } from "@/components/ui/loading";
+import { useAuth } from "@/contexts/AuthContext";
+import { hasCompletedOnboarding } from "@/lib/auth";
+import { examBoards } from "@/lib/subject-data";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronDown, Dna, FlaskConical, Atom, Microscope } from "lucide-react";
+import { ChevronLeft, Dna, FlaskConical, Atom, Microscope } from "lucide-react";
 
 export default function ExamBoardsPage() {
+  const { user, loading } = useAuth();
   const router = useRouter();
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [examBoardSelections, setExamBoardSelections] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    // Redirect to login if not authenticated
+    if (!loading && !user) {
+      router.push('/login');
+      return;
+    }
+
+    // Check if user has already completed onboarding
+    if (user) {
+      hasCompletedOnboarding(user).then((completed) => {
+        if (completed) {
+          router.push('/my-plan');
+          return;
+        }
+      });
+    }
+
     // Load selected subjects from localStorage
     const saved = localStorage.getItem('selectedSubjects');
     if (saved) {
@@ -25,7 +45,21 @@ export default function ExamBoardsPage() {
     if (savedExamBoards) {
       setExamBoardSelections(JSON.parse(savedExamBoards));
     }
-  }, []);
+  }, [user, loading, router]);
+
+  // Show loading overlay while checking authentication
+  if (loading) {
+    return (
+      <LoadingOverlay isLoading={true} message="Loading exam boards...">
+        <div className="min-h-screen bg-background" />
+      </LoadingOverlay>
+    );
+  }
+
+  // Don't render anything if not authenticated (will redirect)
+  if (!user) {
+    return null;
+  }
 
   const handleExamBoardChange = (subjectId: string, examBoardId: string) => {
     const newSelection = {
@@ -38,7 +72,7 @@ export default function ExamBoardsPage() {
   };
 
   const handleContinue = () => {
-    router.push('/onboarding/topics');
+    router.push('/create-plan/topics');
   };
 
   const getIconComponent = (iconName: string) => {
@@ -85,7 +119,7 @@ export default function ExamBoardsPage() {
                   What exam boards are you covering?
                 </h2>
                 <p className="text-muted-foreground">
-                  We'll automatically import the topics for your exam boards, based on your year group.
+                  We&apos;ll automatically import the topics for your exam boards, based on your year group.
                 </p>
               </div>
             </div>

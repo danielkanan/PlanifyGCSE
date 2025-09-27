@@ -5,20 +5,23 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signInWithGoogle, signInWithMicrosoft, createAccount } from "@/lib/auth";
+import { signInWithGoogle, signInWithMicrosoft, createAccount, hasCompletedOnboarding } from "@/lib/auth";
 import { validateEmail, validatePassword, validateConfirmPassword, sanitizeInput } from "@/lib/validation";
 import { useRouter } from "next/navigation";
 import { 
   PageTransition, 
-  FadeInUp, 
   StaggerContainer, 
   StaggerItem
 } from "@/components/ui/animate";
-import { LoadingOverlay, LoadingButton } from "@/components/ui/loading";
+import { LoadingButton } from "@/components/ui/loading";
 
 export default function RegisterPage() {
   const [showEmailForm, setShowEmailForm] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loadingStates, setLoadingStates] = useState({
+    google: false,
+    microsoft: false,
+    email: false
+  });
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -33,25 +36,35 @@ export default function RegisterPage() {
 
   const handleGoogleSignIn = async () => {
     try {
-      setLoading(true);
-      await signInWithGoogle();
-      router.push("/onboarding/subjects");
+      setLoadingStates(prev => ({ ...prev, google: true }));
+      const result = await signInWithGoogle();
+      const onboardingCompleted = await hasCompletedOnboarding(result.user);
+      
+      // Wait a moment for auth state to update
+      setTimeout(() => {
+        router.push(onboardingCompleted ? "/my-plan" : "/create-plan/subjects");
+      }, 100);
     } catch (error) {
       console.error("Google sign-in failed:", error);
     } finally {
-      setLoading(false);
+      setLoadingStates(prev => ({ ...prev, google: false }));
     }
   };
 
   const handleMicrosoftSignIn = async () => {
     try {
-      setLoading(true);
-      await signInWithMicrosoft();
-      router.push("/onboarding/subjects");
+      setLoadingStates(prev => ({ ...prev, microsoft: true }));
+      const result = await signInWithMicrosoft();
+      const onboardingCompleted = await hasCompletedOnboarding(result.user);
+      
+      // Wait a moment for auth state to update
+      setTimeout(() => {
+        router.push(onboardingCompleted ? "/my-plan" : "/create-plan/subjects");
+      }, 100);
     } catch (error) {
       console.error("Microsoft sign-in failed:", error);
     } finally {
-      setLoading(false);
+      setLoadingStates(prev => ({ ...prev, microsoft: false }));
     }
   };
 
@@ -76,17 +89,20 @@ export default function RegisterPage() {
     }
     
     try {
-      setLoading(true);
+      setLoadingStates(prev => ({ ...prev, email: true }));
       const sanitizedEmail = sanitizeInput(formData.email);
-      await createAccount(sanitizedEmail, formData.password);
-      router.push("/onboarding/subjects");
+      const result = await createAccount(sanitizedEmail, formData.password);
+      // New users always go to create-plan
+      setTimeout(() => {
+        router.push("/create-plan/subjects");
+      }, 100);
     } catch (error) {
       console.error("Registration failed:", error);
       setErrors({ 
         email: "Registration failed. Email may already be in use." 
       });
     } finally {
-      setLoading(false);
+      setLoadingStates(prev => ({ ...prev, email: false }));
     }
   };
 
@@ -135,7 +151,7 @@ export default function RegisterPage() {
                     variant="outline" 
                     className="w-full h-12 flex items-center justify-center gap-3 text-foreground border-input hover:bg-accent"
                     onClick={handleGoogleSignIn}
-                    isLoading={loading}
+                    isLoading={loadingStates.google}
                     loadingText="Signing up..."
                   >
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -163,7 +179,7 @@ export default function RegisterPage() {
                     variant="outline" 
                     className="w-full h-12 flex items-center justify-center gap-3 text-foreground border-input hover:bg-accent"
                     onClick={handleMicrosoftSignIn}
-                    isLoading={loading}
+                    isLoading={loadingStates.microsoft}
                     loadingText="Signing up..."
                   >
                     <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -192,7 +208,7 @@ export default function RegisterPage() {
                   variant="outline" 
                   className="w-full h-12 flex items-center justify-center gap-3 text-foreground border-input hover:bg-accent"
                   onClick={() => setShowEmailForm(true)}
-                  disabled={loading}
+                  disabled={loadingStates.google || loadingStates.microsoft}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -217,7 +233,7 @@ export default function RegisterPage() {
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     required
-                    disabled={loading}
+                    disabled={loadingStates.email}
                   />
                   {errors.email && (
                     <p className="text-sm text-red-500">{errors.email}</p>
@@ -239,7 +255,7 @@ export default function RegisterPage() {
                     value={formData.password}
                     onChange={(e) => handleInputChange("password", e.target.value)}
                     required
-                    disabled={loading}
+                    disabled={loadingStates.email}
                   />
                   {errors.password && (
                     <p className="text-sm text-red-500">{errors.password}</p>
@@ -258,7 +274,7 @@ export default function RegisterPage() {
                     value={formData.confirmPassword}
                     onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                     required
-                    disabled={loading}
+                    disabled={loadingStates.email}
                   />
                   {errors.confirmPassword && (
                     <p className="text-sm text-red-500">{errors.confirmPassword}</p>
@@ -268,7 +284,7 @@ export default function RegisterPage() {
                 <LoadingButton
                   type="submit" 
                   className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
-                  isLoading={loading}
+                  isLoading={loadingStates.email}
                   loadingText="Creating Account..."
                 >
                   Create Account
@@ -290,7 +306,7 @@ export default function RegisterPage() {
                   variant="outline" 
                   className="w-full h-12 flex items-center justify-center gap-3 text-foreground border-input hover:bg-accent"
                   onClick={() => setShowEmailForm(false)}
-                  disabled={loading}
+                  disabled={loadingStates.email}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
