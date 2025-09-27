@@ -13,10 +13,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { 
-  User as UserIcon, 
   LogOut, 
-  Calendar,
-  ChevronDown 
+  Calendar
 } from "lucide-react";
 
 interface UserDropdownProps {
@@ -70,11 +68,9 @@ export function UserDropdown({ user }: UserDropdownProps) {
           disabled={isLoading}
         >
           {user.photoURL ? (
-            <img
-              src={user.photoURL}
-              alt={user.displayName || "User"}
-              className="h-9 w-9 rounded-full object-cover"
-            />
+            <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-base">
+              {initials}
+            </div>
           ) : (
             <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-base">
               {initials}

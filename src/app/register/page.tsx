@@ -91,7 +91,7 @@ export default function RegisterPage() {
     try {
       setLoadingStates(prev => ({ ...prev, email: true }));
       const sanitizedEmail = sanitizeInput(formData.email);
-      const result = await createAccount(sanitizedEmail, formData.password);
+      await createAccount(sanitizedEmail, formData.password);
       // New users always go to create-plan
       setTimeout(() => {
         router.push("/create-plan/subjects");

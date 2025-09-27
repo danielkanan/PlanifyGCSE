@@ -10,7 +10,6 @@ import {
   FadeInUp, 
   StaggerContainer, 
   StaggerItem,
-  ScrollFadeInUp,
   ScrollSlideInFromLeft,
   ScrollSlideInFromRight,
   ScrollStaggerContainer,
