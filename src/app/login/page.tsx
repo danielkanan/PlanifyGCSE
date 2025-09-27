@@ -2,7 +2,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,63 +15,48 @@ import {
   StaggerItem
 } from "@/components/ui/animate";
 import { LoadingOverlay, LoadingButton } from "@/components/ui/loading";
-import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
 
 
 export default function LoginPage() {
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const [microsoftLoading, setMicrosoftLoading] = useState(false);
-  const [emailLoading, setEmailLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const router = useRouter();
-
-  // Clear error when component mounts
-  useEffect(() => {
-    setError("");
-  }, []);
 
   const handleGoogleSignIn = async () => {
     try {
-      setGoogleLoading(true);
-      setError("");
+      setLoading(true);
       await signInWithGoogle();
       router.push("/");
     } catch (error) {
       console.error("Google sign-in failed:", error);
-      setError(getFirebaseErrorMessage(error));
     } finally {
-      setGoogleLoading(false);
+      setLoading(false);
     }
   };
 
   const handleMicrosoftSignIn = async () => {
     try {
-      setMicrosoftLoading(true);
-      setError("");
+      setLoading(true);
       await signInWithMicrosoft();
       router.push("/");
     } catch (error) {
       console.error("Microsoft sign-in failed:", error);
-      setError(getFirebaseErrorMessage(error));
     } finally {
-      setMicrosoftLoading(false);
+      setLoading(false);
     }
   };
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      setEmailLoading(true);
-      setError("");
+      setLoading(true);
       await signInWithEmail(email, password);
       router.push("/");
     } catch (error) {
       console.error("Email sign-in failed:", error);
-      setError(getFirebaseErrorMessage(error));
     } finally {
-      setEmailLoading(false);
+      setLoading(false);
     }
   };
 
@@ -103,31 +88,6 @@ export default function LoginPage() {
             </div>
           </StaggerItem>
 
-          {/* Error Message */}
-          {error && (
-            <StaggerItem>
-              <div className="bg-orange-50 dark:bg-orange-100/30 border border-orange-200 dark:border-orange-300 rounded-md px-3 py-3 flex items-start justify-between gap-2">
-                <div className="flex items-start gap-2 flex-1">
-                  <svg className="w-4 h-4 text-orange-600 dark:text-orange-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                  <p className="text-sm text-orange-700 dark:text-orange-800 leading-relaxed">
-                    {error}
-                  </p>
-                </div>
-                <button
-                  onClick={() => setError("")}
-                  className="text-orange-500 hover:text-orange-700 dark:text-orange-600 dark:hover:text-orange-800 transition-colors flex-shrink-0 cursor-pointer mt-0.5"
-                  aria-label="Close error message"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </StaggerItem>
-          )}
-
           {/* Social Login Buttons */}
           <StaggerItem>
             <div className="space-y-3">
@@ -135,9 +95,8 @@ export default function LoginPage() {
                 variant="outline" 
                 className="w-full h-12 flex items-center justify-center gap-3 text-foreground border-input hover:bg-accent"
                 onClick={handleGoogleSignIn}
-                isLoading={googleLoading}
-                loadingText="Signing in with Google..."
-                disabled={microsoftLoading || emailLoading}
+                isLoading={loading}
+                loadingText="Signing in..."
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path
@@ -164,9 +123,8 @@ export default function LoginPage() {
                 variant="outline" 
                 className="w-full h-12 flex items-center justify-center gap-3 text-foreground border-input hover:bg-accent"
                 onClick={handleMicrosoftSignIn}
-                isLoading={microsoftLoading}
-                loadingText="Signing in with Microsoft..."
-                disabled={googleLoading || emailLoading}
+                isLoading={loading}
+                loadingText="Signing in..."
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zm12.6 0H12.6V0H24v11.4z"/>
@@ -203,7 +161,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  disabled={googleLoading || microsoftLoading || emailLoading}
+                  disabled={loading}
                 />
               </div>
 
@@ -219,16 +177,15 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  disabled={googleLoading || microsoftLoading || emailLoading}
+                  disabled={loading}
                 />
               </div>
 
               <LoadingButton
                 type="submit" 
                 className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
-                isLoading={emailLoading}
+                isLoading={loading}
                 loadingText="Signing in..."
-                disabled={googleLoading || microsoftLoading}
               >
                 Login
               </LoadingButton>

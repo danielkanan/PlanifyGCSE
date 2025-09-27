@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { OnboardingProvider } from "@/contexts/OnboardingContext";
 
 const dmSans = DM_Sans({
   variable: "--font-sans",
@@ -10,11 +9,8 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "PlanifyGCSE",
+  title: "PlanifyGCSE - Smart Revision Planning for Students",
   description: "Plan, track and structure your GCSE revision effectively. Use PlanifyGCSE's intelligent revision planning tool to plan and ace your exams.",
-  icons: {
-    icon: '/favicon.svg',
-  },
 };
 
 export default function RootLayout({
@@ -28,9 +24,7 @@ export default function RootLayout({
         className={`${dmSans.variable} antialiased`}
       >
         <AuthProvider>
-          <OnboardingProvider>
-            {children}
-          </OnboardingProvider>
+          {children}
         </AuthProvider>
       </body>
     </html>

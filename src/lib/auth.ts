@@ -32,14 +32,8 @@ export const signInWithGoogle = async (): Promise<UserCredential> => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
     return result;
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error signing in with Google:", error);
-    
-    // Handle popup cancellation
-    if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
-      throw new Error('Sign-in was cancelled');
-    }
-    
     throw error;
   }
 };
@@ -49,14 +43,8 @@ export const signInWithMicrosoft = async (): Promise<UserCredential> => {
   try {
     const result = await signInWithPopup(auth, microsoftProvider);
     return result;
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error signing in with Microsoft:", error);
-    
-    // Handle popup cancellation
-    if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
-      throw new Error('Sign-in was cancelled');
-    }
-    
     throw error;
   }
 };
