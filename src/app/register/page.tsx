@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,50 +14,65 @@ import {
   StaggerItem
 } from "@/components/ui/animate";
 import { LoadingOverlay, LoadingButton } from "@/components/ui/loading";
+import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
 
 export default function RegisterPage() {
   const [showEmailForm, setShowEmailForm] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [microsoftLoading, setMicrosoftLoading] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: ""
   });
+  const [error, setError] = useState("");
   const router = useRouter();
+
+  // Clear error when component mounts
+  useEffect(() => {
+    setError("");
+  }, []);
 
   const handleGoogleSignIn = async () => {
     try {
-      setLoading(true);
+      setGoogleLoading(true);
+      setError("");
       await signInWithGoogle();
-      router.push("/");
+      router.push("/onboarding/subjects");
     } catch (error) {
       console.error("Google sign-in failed:", error);
+      setError(getFirebaseErrorMessage(error));
     } finally {
-      setLoading(false);
+      setGoogleLoading(false);
     }
   };
 
   const handleMicrosoftSignIn = async () => {
     try {
-      setLoading(true);
+      setMicrosoftLoading(true);
+      setError("");
       await signInWithMicrosoft();
-      router.push("/");
+      router.push("/onboarding/subjects");
     } catch (error) {
       console.error("Microsoft sign-in failed:", error);
+      setError(getFirebaseErrorMessage(error));
     } finally {
-      setLoading(false);
+      setMicrosoftLoading(false);
     }
   };
 
   const handleEmailRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      setLoading(true);
+      setEmailLoading(true);
+      setError("");
       await createAccount(formData.email, formData.password);
-      router.push("/");
+      router.push("/onboarding/subjects");
     } catch (error) {
       console.error("Registration failed:", error);
+      setError(getFirebaseErrorMessage(error));
     } finally {
-      setLoading(false);
+      setEmailLoading(false);
     }
   };
 
@@ -96,6 +111,31 @@ export default function RegisterPage() {
             </div>
           </StaggerItem>
 
+          {/* Error Message */}
+          {error && (
+            <StaggerItem>
+              <div className="bg-orange-50 dark:bg-orange-100/30 border border-orange-200 dark:border-orange-300 rounded-md px-3 py-3 flex items-start justify-between gap-2">
+                <div className="flex items-start gap-2 flex-1">
+                  <svg className="w-4 h-4 text-orange-600 dark:text-orange-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <p className="text-sm text-orange-700 dark:text-orange-800 leading-relaxed">
+                    {error}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setError("")}
+                  className="text-orange-500 hover:text-orange-700 dark:text-orange-600 dark:hover:text-orange-800 transition-colors flex-shrink-0 cursor-pointer mt-0.5"
+                  aria-label="Close error message"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </StaggerItem>
+          )}
+
           {!showEmailForm ? (
             // Social Login Options
             <>
@@ -106,8 +146,9 @@ export default function RegisterPage() {
                     variant="outline" 
                     className="w-full h-12 flex items-center justify-center gap-3 text-foreground border-input hover:bg-accent"
                     onClick={handleGoogleSignIn}
-                    isLoading={loading}
-                    loadingText="Signing up..."
+                    isLoading={googleLoading}
+                    loadingText="Signing up with Google..."
+                    disabled={microsoftLoading || emailLoading}
                   >
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
                       <path
@@ -134,8 +175,9 @@ export default function RegisterPage() {
                     variant="outline" 
                     className="w-full h-12 flex items-center justify-center gap-3 text-foreground border-input hover:bg-accent"
                     onClick={handleMicrosoftSignIn}
-                    isLoading={loading}
-                    loadingText="Signing up..."
+                    isLoading={microsoftLoading}
+                    loadingText="Signing up with Microsoft..."
+                    disabled={googleLoading || emailLoading}
                   >
                     <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zm12.6 0H12.6V0H24v11.4z"/>
@@ -163,7 +205,7 @@ export default function RegisterPage() {
                   variant="outline" 
                   className="w-full h-12 flex items-center justify-center gap-3 text-foreground border-input hover:bg-accent"
                   onClick={() => setShowEmailForm(true)}
-                  disabled={loading}
+                  disabled={googleLoading || microsoftLoading || emailLoading}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -188,7 +230,7 @@ export default function RegisterPage() {
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     required
-                    disabled={loading}
+                    disabled={googleLoading || microsoftLoading || emailLoading}
                   />
                 </div>
 
@@ -205,15 +247,16 @@ export default function RegisterPage() {
                     value={formData.password}
                     onChange={(e) => handleInputChange("password", e.target.value)}
                     required
-                    disabled={loading}
+                    disabled={googleLoading || microsoftLoading || emailLoading}
                   />
                 </div>
 
                 <LoadingButton
                   type="submit" 
                   className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
-                  isLoading={loading}
+                  isLoading={emailLoading}
                   loadingText="Creating Account..."
+                  disabled={googleLoading || microsoftLoading}
                 >
                   Create Account
                 </LoadingButton>
@@ -234,7 +277,7 @@ export default function RegisterPage() {
                   variant="outline" 
                   className="w-full h-12 flex items-center justify-center gap-3 text-foreground border-input hover:bg-accent"
                   onClick={() => setShowEmailForm(false)}
-                  disabled={loading}
+                  disabled={googleLoading || microsoftLoading || emailLoading}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
