@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signInWithGoogle, signInWithMicrosoft, createAccount } from "@/lib/auth";
+import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
 import { useRouter } from "next/navigation";
 import { 
   PageTransition, 
@@ -18,6 +19,7 @@ import { LoadingOverlay, LoadingButton } from "@/components/ui/loading";
 export default function RegisterPage() {
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     password: ""
@@ -27,10 +29,11 @@ export default function RegisterPage() {
   const handleGoogleSignIn = async () => {
     try {
       setLoading(true);
+      setError("");
       await signInWithGoogle();
       router.push("/");
     } catch (error) {
-      console.error("Google sign-in failed:", error);
+      setError(getFirebaseErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -39,10 +42,11 @@ export default function RegisterPage() {
   const handleMicrosoftSignIn = async () => {
     try {
       setLoading(true);
+      setError("");
       await signInWithMicrosoft();
       router.push("/");
     } catch (error) {
-      console.error("Microsoft sign-in failed:", error);
+      setError(getFirebaseErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -52,10 +56,11 @@ export default function RegisterPage() {
     e.preventDefault();
     try {
       setLoading(true);
+      setError("");
       await createAccount(formData.email, formData.password);
       router.push("/");
     } catch (error) {
-      console.error("Registration failed:", error);
+      setError(getFirebaseErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -95,6 +100,22 @@ export default function RegisterPage() {
               </p>
             </div>
           </StaggerItem>
+
+          {/* Error Display */}
+          {error && (
+            <StaggerItem>
+              <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 backdrop-blur-sm">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 mt-0.5">
+                    <svg className="w-4 h-4 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <p className="text-sm text-destructive leading-relaxed">{error}</p>
+                </div>
+              </div>
+            </StaggerItem>
+          )}
 
           {!showEmailForm ? (
             // Social Login Options

@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { sendPasswordReset } from "@/lib/auth";
+import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
 import { useRouter } from "next/navigation";
 import { FirebaseError } from "firebase/app";
 import { 
@@ -42,41 +44,11 @@ export default function ForgotPasswordPage() {
     try {
       setLoading(true);
       
-      // Send custom password reset email via our API
-      const response = await fetch('/api/send-reset-link', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to send reset email');
-      }
+      // Use Firebase's built-in password reset functionality
+      await sendPasswordReset(email);
       setSuccess(true);
     } catch (error) {
-      console.error("Password reset failed:", error);
-      
-      // Handle API errors (from our custom backend)
-      if (error instanceof Error) {
-        setError(error.message);
-      } else if (error instanceof FirebaseError) {
-        switch (error.code) {
-          case 'auth/user-not-found':
-            setError("No account found with this email address");
-            break;
-          case 'auth/invalid-email':
-            setError("Please enter a valid email address");
-            break;
-          case 'auth/too-many-requests':
-            setError("Too many requests. Please try again later");
-            break;
-          default:
-            setError("Failed to send reset email. Please try again");
-        }
-      } else {
-        setError("An unexpected error occurred. Please try again");
-      }
+      setError(getFirebaseErrorMessage(error));
     } finally {
       setLoading(false);
     }
