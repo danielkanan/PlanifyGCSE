@@ -35,7 +35,7 @@ export default function RegisterPage() {
     try {
       setLoading(true);
       await signInWithGoogle();
-      router.push("/");
+      router.push("/onboarding/subjects");
     } catch (error) {
       console.error("Google sign-in failed:", error);
     } finally {
@@ -47,7 +47,7 @@ export default function RegisterPage() {
     try {
       setLoading(true);
       await signInWithMicrosoft();
-      router.push("/");
+      router.push("/onboarding/subjects");
     } catch (error) {
       console.error("Microsoft sign-in failed:", error);
     } finally {
@@ -79,7 +79,7 @@ export default function RegisterPage() {
       setLoading(true);
       const sanitizedEmail = sanitizeInput(formData.email);
       await createAccount(sanitizedEmail, formData.password);
-      router.push("/");
+      router.push("/onboarding/subjects");
     } catch (error) {
       console.error("Registration failed:", error);
       setErrors({ 
