@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signInWithGoogle, signInWithMicrosoft, createAccount } from "@/lib/auth";
+import { validateEmail, validatePassword, validateConfirmPassword, sanitizeInput } from "@/lib/validation";
 import { useRouter } from "next/navigation";
 import { 
   PageTransition, 
@@ -20,8 +21,14 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
-    password: ""
+    password: "",
+    confirmPassword: ""
   });
+  const [errors, setErrors] = useState<{ 
+    email?: string; 
+    password?: string; 
+    confirmPassword?: string; 
+  }>({});
   const router = useRouter();
 
   const handleGoogleSignIn = async () => {
@@ -50,12 +57,34 @@ export default function RegisterPage() {
 
   const handleEmailRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Clear previous errors
+    setErrors({});
+    
+    // Validate inputs
+    const emailValidation = validateEmail(formData.email);
+    const passwordValidation = validatePassword(formData.password);
+    const confirmPasswordValidation = validateConfirmPassword(formData.password, formData.confirmPassword);
+    
+    if (!emailValidation.isValid || !passwordValidation.isValid || !confirmPasswordValidation.isValid) {
+      setErrors({
+        email: emailValidation.error,
+        password: passwordValidation.error,
+        confirmPassword: confirmPasswordValidation.error
+      });
+      return;
+    }
+    
     try {
       setLoading(true);
-      await createAccount(formData.email, formData.password);
+      const sanitizedEmail = sanitizeInput(formData.email);
+      await createAccount(sanitizedEmail, formData.password);
       router.push("/");
     } catch (error) {
       console.error("Registration failed:", error);
+      setErrors({ 
+        email: "Registration failed. Email may already be in use." 
+      });
     } finally {
       setLoading(false);
     }
@@ -184,29 +213,56 @@ export default function RegisterPage() {
                     id="email"
                     type="email"
                     placeholder="Your Email Address"
-                    className="h-12"
+                    className={`h-12 ${errors.email ? 'border-red-500 focus:border-red-500' : ''}`}
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     required
                     disabled={loading}
                   />
+                  {errors.email && (
+                    <p className="text-sm text-red-500">{errors.email}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="password" className="text-sm font-medium text-foreground">
                     Create a Password
                   </Label>
-                  <p className="text-xs text-muted-foreground">Minimum of 8 characters.</p>
+                  <p className="text-xs text-muted-foreground">
+                    Must be at least 8 characters with uppercase, lowercase, number, and special character.
+                  </p>
                   <Input
                     id="password"
                     type="password"
                     placeholder="Create a Password"
-                    className="h-12"
+                    className={`h-12 ${errors.password ? 'border-red-500 focus:border-red-500' : ''}`}
                     value={formData.password}
                     onChange={(e) => handleInputChange("password", e.target.value)}
                     required
                     disabled={loading}
                   />
+                  {errors.password && (
+                    <p className="text-sm text-red-500">{errors.password}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword" className="text-sm font-medium text-foreground">
+                    Confirm Password
+                  </Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="Confirm your Password"
+                    className={`h-12 ${errors.confirmPassword ? 'border-red-500 focus:border-red-500' : ''}`}
+                    value={formData.confirmPassword}
+                    onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                    required
+                    disabled={loading}
+                  />
+                  {errors.confirmPassword && (
+                    <p className="text-sm text-red-500">{errors.confirmPassword}</p>
+                  )}
                 </div>
 
                 <LoadingButton

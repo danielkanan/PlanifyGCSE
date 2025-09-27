@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signInWithGoogle, signInWithMicrosoft, signInWithEmail } from "@/lib/auth";
+import { validateEmail, validatePassword, sanitizeInput } from "@/lib/validation";
 import { useRouter } from "next/navigation";
 import { 
   PageTransition, 
@@ -21,6 +22,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const router = useRouter();
 
   const handleGoogleSignIn = async () => {
@@ -49,12 +51,32 @@ export default function LoginPage() {
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Clear previous errors
+    setErrors({});
+    
+    // Validate inputs
+    const emailValidation = validateEmail(email);
+    const passwordValidation = validatePassword(password);
+    
+    if (!emailValidation.isValid || !passwordValidation.isValid) {
+      setErrors({
+        email: emailValidation.error,
+        password: passwordValidation.error
+      });
+      return;
+    }
+    
     try {
       setLoading(true);
-      await signInWithEmail(email, password);
+      const sanitizedEmail = sanitizeInput(email);
+      await signInWithEmail(sanitizedEmail, password);
       router.push("/");
     } catch (error) {
       console.error("Email sign-in failed:", error);
+      setErrors({ 
+        email: "Invalid email or password. Please try again." 
+      });
     } finally {
       setLoading(false);
     }
@@ -157,12 +179,15 @@ export default function LoginPage() {
                   id="email"
                   type="email"
                   placeholder="Your Email Address"
-                  className="h-12"
+                  className={`h-12 ${errors.email ? 'border-red-500 focus:border-red-500' : ''}`}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={loading}
                 />
+                {errors.email && (
+                  <p className="text-sm text-red-500">{errors.email}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -173,12 +198,15 @@ export default function LoginPage() {
                   id="password"
                   type="password"
                   placeholder="Enter your Password"
-                  className="h-12"
+                  className={`h-12 ${errors.password ? 'border-red-500 focus:border-red-500' : ''}`}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={loading}
                 />
+                {errors.password && (
+                  <p className="text-sm text-red-500">{errors.password}</p>
+                )}
               </div>
 
               <LoadingButton
