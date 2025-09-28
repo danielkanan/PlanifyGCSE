@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { PageTransition, FadeInUp, StaggerContainer, StaggerItem } from "@/components/ui/animate";
 import { LoadingOverlay } from "@/components/ui/loading";
 import { useAuth } from "@/contexts/AuthContext";
-import { hasCompletedOnboarding } from "@/lib/auth";
+import { hasCompletedOnboarding, markOnboardingCompleted, saveUserPlan } from "@/lib/auth";
 import { motion, AnimatePresence } from "framer-motion";
 import { examBoards } from "@/lib/subject-data";
 import { useRouter } from "next/navigation";
@@ -30,6 +30,15 @@ export default function TopicsPage() {
   }, [examBoardSelections]);
 
   useEffect(() => {
+    // Clear localStorage on page reload
+    const handleBeforeUnload = () => {
+      localStorage.removeItem('selectedSubjects');
+      localStorage.removeItem('examBoardSelections');
+      localStorage.removeItem('selectedTopics');
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
     // Redirect to login if not authenticated
     if (!loading && !user) {
       router.push('/login');
@@ -50,7 +59,7 @@ export default function TopicsPage() {
     const savedSubjects = localStorage.getItem('selectedSubjects');
     const savedExamBoards = localStorage.getItem('examBoardSelections');
     const savedTopics = localStorage.getItem('selectedTopics');
-    
+
     if (savedSubjects) {
       setSelectedSubjects(JSON.parse(savedSubjects));
     }
@@ -60,6 +69,10 @@ export default function TopicsPage() {
     if (savedTopics) {
       setSelectedTopics(JSON.parse(savedTopics));
     }
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, [user, loading, router]);
 
   // Auto-select all subtopics when subjects and exam boards are loaded (only if no saved topics)
@@ -143,7 +156,7 @@ export default function TopicsPage() {
     localStorage.setItem('selectedTopics', JSON.stringify(newSelection));
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (currentSubjectIndex < selectedSubjects.length - 1) {
       // Move to next subject and scroll to top
       setCurrentSubjectIndex(prev => prev + 1);
@@ -152,8 +165,27 @@ export default function TopicsPage() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }, 100);
     } else {
-      // Go to my-plan
-      router.push('/my-plan');
+      // Save plan data and mark onboarding as completed
+      if (user) {
+        try {
+          // Save the complete plan data to Firestore
+          await saveUserPlan(user, selectedSubjects, examBoardSelections, selectedTopics);
+          await markOnboardingCompleted(user);
+          
+          // Clear localStorage after successful save
+          localStorage.removeItem('selectedSubjects');
+          localStorage.removeItem('examBoardSelections');
+          localStorage.removeItem('selectedTopics');
+          
+          router.push('/my-plan');
+        } catch (error) {
+          console.error("Failed to save plan or mark onboarding as completed:", error);
+          // Still redirect to my-plan even if saving fails
+          router.push('/my-plan');
+        }
+      } else {
+        router.push('/my-plan');
+      }
     }
   };
 

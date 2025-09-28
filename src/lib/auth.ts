@@ -18,6 +18,7 @@ import {
   serverTimestamp 
 } from "firebase/firestore";
 import { auth, db } from "./firebase";
+import { examBoards } from "./subject-data";
 
 // Initialize providers
 const googleProvider = new GoogleAuthProvider();
@@ -161,5 +162,69 @@ export const hasCompletedOnboarding = async (user: User): Promise<boolean> => {
   } catch (error) {
     console.error("Error checking onboarding status:", error);
     return false;
+  }
+};
+
+// Mark onboarding as completed
+export const markOnboardingCompleted = async (user: User): Promise<void> => {
+  try {
+    const userDocRef = doc(db, 'users', user.uid);
+    await setDoc(userDocRef, {
+      onboardingCompleted: true,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+  } catch (error) {
+    console.error("Error marking onboarding as completed:", error);
+    throw error;
+  }
+};
+
+// Save user plan data to Firestore
+export const saveUserPlan = async (
+  user: User, 
+  selectedSubjects: string[], 
+  examBoardSelections: Record<string, string>, 
+  selectedTopics: Record<string, string[]>
+): Promise<void> => {
+  try {
+    const userDocRef = doc(db, 'users', user.uid);
+    
+    // Organize the data nicely for Firestore
+    const planData = {
+      subjects: selectedSubjects.map(subjectId => {
+        const examBoardId = examBoardSelections[subjectId];
+        const examBoard = examBoards.find(board => board.id === examBoardId);
+        const subject = examBoard?.subjects.find(s => s.id === subjectId);
+        
+        return {
+          id: subjectId,
+          name: subject?.name || '',
+          icon: subject?.icon || '',
+          examBoard: {
+            id: examBoardId,
+            name: examBoard?.name || ''
+          },
+          topics: subject?.topics.map(topic => {
+            const key = `${subjectId}-${topic.id}`;
+            const selectedSubtopics = selectedTopics[key] || [];
+            
+            return {
+              id: topic.id,
+              name: topic.name,
+              subtopics: topic.subtopics?.map(subtopic => ({
+                name: subtopic,
+                selected: selectedSubtopics.includes(subtopic)
+              })) || []
+            };
+          }) || []
+        };
+      }),
+      updatedAt: serverTimestamp()
+    };
+    
+    await setDoc(userDocRef, planData, { merge: true });
+  } catch (error) {
+    console.error("Error saving user plan:", error);
+    throw error;
   }
 };

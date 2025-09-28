@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signInWithGoogle, signInWithMicrosoft, signInWithEmail, hasCompletedOnboarding } from "@/lib/auth";
 import { validateEmail, validatePassword, sanitizeInput } from "@/lib/validation";
+import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
 import { useRouter } from "next/navigation";
 import { 
   PageTransition, 
@@ -23,7 +24,7 @@ export default function LoginPage() {
   });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
   const router = useRouter();
 
   const handleGoogleSignIn = async () => {
@@ -32,12 +33,11 @@ export default function LoginPage() {
       const result = await signInWithGoogle();
       const onboardingCompleted = await hasCompletedOnboarding(result.user);
       
-      // Wait a moment for auth state to update
-      setTimeout(() => {
-        router.push(onboardingCompleted ? "/my-plan" : "/create-plan/subjects");
-      }, 100);
+      // Redirect based on onboarding status
+      router.push(onboardingCompleted ? "/my-plan" : "/create-plan/subjects");
     } catch (error) {
       console.error("Google sign-in failed:", error);
+      setErrors({ general: getFirebaseErrorMessage(error) });
     } finally {
       setLoadingStates(prev => ({ ...prev, google: false }));
     }
@@ -49,12 +49,11 @@ export default function LoginPage() {
       const result = await signInWithMicrosoft();
       const onboardingCompleted = await hasCompletedOnboarding(result.user);
       
-      // Wait a moment for auth state to update
-      setTimeout(() => {
-        router.push(onboardingCompleted ? "/my-plan" : "/create-plan/subjects");
-      }, 100);
+      // Redirect based on onboarding status
+      router.push(onboardingCompleted ? "/my-plan" : "/create-plan/subjects");
     } catch (error) {
       console.error("Microsoft sign-in failed:", error);
+      setErrors({ general: getFirebaseErrorMessage(error) });
     } finally {
       setLoadingStates(prev => ({ ...prev, microsoft: false }));
     }
@@ -84,14 +83,12 @@ export default function LoginPage() {
       const result = await signInWithEmail(sanitizedEmail, password);
       const onboardingCompleted = await hasCompletedOnboarding(result.user);
       
-      // Wait a moment for auth state to update
-      setTimeout(() => {
-        router.push(onboardingCompleted ? "/my-plan" : "/create-plan/subjects");
-      }, 100);
+      // Redirect based on onboarding status
+      router.push(onboardingCompleted ? "/my-plan" : "/create-plan/subjects");
     } catch (error) {
       console.error("Email sign-in failed:", error);
       setErrors({ 
-        email: "Invalid email or password. Please try again." 
+        email: getFirebaseErrorMessage(error)
       });
     } finally {
       setLoadingStates(prev => ({ ...prev, email: false }));
@@ -125,6 +122,22 @@ export default function LoginPage() {
               </p>
             </div>
           </StaggerItem>
+
+          {/* Error Display */}
+          {errors.general && (
+            <StaggerItem>
+              <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 mt-0.5">
+                    <svg className="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <p className="text-sm text-red-700 dark:text-red-300 leading-relaxed">{errors.general}</p>
+                </div>
+              </div>
+            </StaggerItem>
+          )}
 
           {/* Social Login Buttons */}
           <StaggerItem>

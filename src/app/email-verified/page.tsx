@@ -38,7 +38,7 @@ export default function EmailVerifiedPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-center text-muted-foreground">
-              Your email address has been verified. You can now access all PlanifyGCSEGCSE features and start building your personalized revision plan.
+              Your email address has been verified. You can now access all PlanifyGCSE features and start building your personalized revision plan.
             </p>
             <div className="space-y-3 pt-4">
               <Button 
@@ -46,7 +46,7 @@ export default function EmailVerifiedPage() {
                 className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
               >
                 <Link href="/">
-                  Get Started with PlanifyGCSEGCSE
+                  Get Started with PlanifyGCSE
                 </Link>
               </Button>
               <Button 

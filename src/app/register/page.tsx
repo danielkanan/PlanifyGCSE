@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signInWithGoogle, signInWithMicrosoft, createAccount, hasCompletedOnboarding } from "@/lib/auth";
 import { validateEmail, validatePassword, validateConfirmPassword, sanitizeInput } from "@/lib/validation";
+import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
 import { useRouter } from "next/navigation";
 import { 
   PageTransition, 
@@ -30,7 +31,8 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState<{ 
     email?: string; 
     password?: string; 
-    confirmPassword?: string; 
+    confirmPassword?: string;
+    general?: string;
   }>({});
   const router = useRouter();
 
@@ -40,12 +42,11 @@ export default function RegisterPage() {
       const result = await signInWithGoogle();
       const onboardingCompleted = await hasCompletedOnboarding(result.user);
       
-      // Wait a moment for auth state to update
-      setTimeout(() => {
-        router.push(onboardingCompleted ? "/my-plan" : "/create-plan/subjects");
-      }, 100);
+      // Redirect based on onboarding status
+      router.push(onboardingCompleted ? "/my-plan" : "/create-plan/subjects");
     } catch (error) {
       console.error("Google sign-in failed:", error);
+      setErrors({ general: getFirebaseErrorMessage(error) });
     } finally {
       setLoadingStates(prev => ({ ...prev, google: false }));
     }
@@ -57,12 +58,11 @@ export default function RegisterPage() {
       const result = await signInWithMicrosoft();
       const onboardingCompleted = await hasCompletedOnboarding(result.user);
       
-      // Wait a moment for auth state to update
-      setTimeout(() => {
-        router.push(onboardingCompleted ? "/my-plan" : "/create-plan/subjects");
-      }, 100);
+      // Redirect based on onboarding status
+      router.push(onboardingCompleted ? "/my-plan" : "/create-plan/subjects");
     } catch (error) {
       console.error("Microsoft sign-in failed:", error);
+      setErrors({ general: getFirebaseErrorMessage(error) });
     } finally {
       setLoadingStates(prev => ({ ...prev, microsoft: false }));
     }
@@ -93,13 +93,11 @@ export default function RegisterPage() {
       const sanitizedEmail = sanitizeInput(formData.email);
       await createAccount(sanitizedEmail, formData.password);
       // New users always go to create-plan
-      setTimeout(() => {
-        router.push("/create-plan/subjects");
-      }, 100);
+      router.push("/create-plan/subjects");
     } catch (error) {
       console.error("Registration failed:", error);
       setErrors({ 
-        email: "Registration failed. Email may already be in use." 
+        email: getFirebaseErrorMessage(error)
       });
     } finally {
       setLoadingStates(prev => ({ ...prev, email: false }));
@@ -144,6 +142,22 @@ export default function RegisterPage() {
           {!showEmailForm ? (
             // Social Login Options
             <>
+              {/* Error Display */}
+              {errors.general && (
+                <StaggerItem>
+                  <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 mt-0.5">
+                        <svg className="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <p className="text-sm text-red-700 dark:text-red-300 leading-relaxed">{errors.general}</p>
+                    </div>
+                  </div>
+                </StaggerItem>
+              )}
+
               {/* Social Login Buttons */}
               <StaggerItem>
                 <div className="space-y-3">
@@ -221,6 +235,19 @@ export default function RegisterPage() {
             // Email Registration Form
             <StaggerItem>
               <form className="space-y-4" onSubmit={handleEmailRegister}>
+                {/* Error Display */}
+                {errors.general && (
+                  <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 mt-0.5">
+                        <svg className="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <p className="text-sm text-red-700 dark:text-red-300 leading-relaxed">{errors.general}</p>
+                    </div>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-sm font-medium text-foreground">
                     Your Email

@@ -34,11 +34,6 @@ yarn-error.log*
 .env*
 !.env.example
 
-# Firebase Admin SDK keys
-firebase-admin-key.json
-service-account-key.json
-*.json.key
-
 # Security sensitive files
 *.pem
 *.key

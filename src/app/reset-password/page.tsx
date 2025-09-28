@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { confirmPasswordReset, verifyPasswordResetCode } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
 
 function ResetPasswordContent() {
   const searchParams = useSearchParams();
@@ -73,34 +74,7 @@ function ResetPasswordContent() {
       setSuccess(true);
     } catch (error: unknown) {
       console.error("Password reset failed:", error);
-      
-      // Handle specific Firebase errors
-      if (error && typeof error === 'object' && 'code' in error) {
-        switch (error.code) {
-          case 'auth/expired-action-code':
-            setError("Reset link has expired. Please request a new one.");
-            break;
-          case 'auth/invalid-action-code':
-            setError("Invalid reset link. Please request a new one.");
-            break;
-          case 'auth/weak-password':
-            setError("Password is too weak. Please choose a stronger password.");
-            break;
-          case 'auth/user-disabled':
-            setError("This account has been disabled. Please contact support.");
-            break;
-          default:
-            if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
-              setError(error.message);
-            } else {
-              setError("An unexpected error occurred. Please try again");
-            }
-        }
-      } else if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
-        setError(error.message);
-      } else {
-        setError("An unexpected error occurred. Please try again");
-      }
+      setError(getFirebaseErrorMessage(error));
     } finally {
       setLoading(false);
     }

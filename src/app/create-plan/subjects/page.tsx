@@ -18,6 +18,15 @@ export default function SubjectsPage() {
   const subjects = getAllSubjects();
 
   useEffect(() => {
+    // Clear localStorage on page reload
+    const handleBeforeUnload = () => {
+      localStorage.removeItem('selectedSubjects');
+      localStorage.removeItem('examBoardSelections');
+      localStorage.removeItem('selectedTopics');
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
     // Redirect to login if not authenticated
     if (!loading && !user) {
       router.push('/login');
@@ -39,6 +48,10 @@ export default function SubjectsPage() {
     if (saved) {
       setSelectedSubjects(JSON.parse(saved));
     }
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, [user, loading, router]);
 
   // Show loading overlay while checking authentication

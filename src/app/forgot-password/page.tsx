@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
-import { FirebaseError } from "firebase/app";
+import { getFirebaseErrorMessage } from "@/lib/firebase-errors";
 import { 
   PageTransition, 
   StaggerContainer, 
@@ -60,22 +60,8 @@ export default function ForgotPasswordPage() {
       // Handle API errors (from our custom backend)
       if (error instanceof Error) {
         setError(error.message);
-      } else if (error instanceof FirebaseError) {
-        switch (error.code) {
-          case 'auth/user-not-found':
-            setError("No account found with this email address");
-            break;
-          case 'auth/invalid-email':
-            setError("Please enter a valid email address");
-            break;
-          case 'auth/too-many-requests':
-            setError("Too many requests. Please try again later");
-            break;
-          default:
-            setError("Failed to send reset email. Please try again");
-        }
       } else {
-        setError("An unexpected error occurred. Please try again");
+        setError(getFirebaseErrorMessage(error));
       }
     } finally {
       setLoading(false);
