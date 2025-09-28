@@ -143,18 +143,38 @@ export default function SubjectsPage() {
                       </div>
                       <div className="flex items-center space-x-2">
                         {selectedSubjects.includes(subject.id) ? (
-                          <span className="text-primary text-sm font-medium">
-                            Added
-                          </span>
+                          <>
+                            {/* Desktop: Show "Added" text */}
+                            <span className="text-primary text-sm font-medium hidden sm:block">
+                              Added
+                            </span>
+                            {/* Mobile: Show only tick icon */}
+                            <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center sm:hidden">
+                              <svg className="w-4 h-4 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                          </>
                         ) : (
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className="text-muted-foreground hover:text-foreground"
-                          >
-                            <Plus className="w-4 h-4 mr-1" />
-                            Add
-                          </Button>
+                          <>
+                            {/* Desktop: Show "Add" button with text */}
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="text-muted-foreground hover:text-foreground hidden sm:flex"
+                            >
+                              <Plus className="w-4 h-4 mr-1" />
+                              Add
+                            </Button>
+                            {/* Mobile: Show only plus icon */}
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="text-muted-foreground hover:text-foreground p-2 sm:hidden"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </Button>
+                          </>
                         )}
                       </div>
                     </div>

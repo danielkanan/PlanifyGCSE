@@ -132,7 +132,7 @@ export default function ExamBoardsPage() {
                   What exam boards are you covering?
                 </h2>
                 <p className="text-muted-foreground">
-                  We&apos;ll automatically import the topics for your exam boards, based on your year group.
+                  We&apos;ll automatically import the topics for your exam boards.
                 </p>
               </div>
             </div>
@@ -162,7 +162,8 @@ export default function ExamBoardsPage() {
                 return (
                   <StaggerItem key={subjectId}>
                     <Card className="p-6 bg-card">
-                      <div className="flex items-center justify-between">
+                      {/* Desktop layout: horizontal */}
+                      <div className="hidden sm:flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                           <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-foreground">
                             {(() => {
@@ -175,6 +176,35 @@ export default function ExamBoardsPage() {
                           </span>
                         </div>
                         <div className="flex-1 max-w-xs ml-8">
+                          <select
+                            value={examBoardSelections[subjectId] || ''}
+                            onChange={(e) => handleExamBoardChange(subjectId, e.target.value)}
+                            className="w-full p-3 bg-muted border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                          >
+                            <option value="">Select your exam board</option>
+                            {availableExamBoards.map((board) => (
+                              <option key={board.id} value={board.id}>
+                                {board.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      
+                      {/* Mobile layout: vertical */}
+                      <div className="sm:hidden space-y-4">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-foreground">
+                            {(() => {
+                              const IconComponent = getIconComponent(subject.icon);
+                              return <IconComponent className="w-5 h-5" />;
+                            })()}
+                          </div>
+                          <span className="text-foreground font-medium text-lg">
+                            {subject.name}
+                          </span>
+                        </div>
+                        <div>
                           <select
                             value={examBoardSelections[subjectId] || ''}
                             onChange={(e) => handleExamBoardChange(subjectId, e.target.value)}

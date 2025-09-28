@@ -245,7 +245,7 @@ export default function TopicsPage() {
                 <h1 className="text-xl font-bold text-muted-foreground mb-2">
                   PlanifyGCSE
                 </h1>
-                <h2 className="text-3xl font-bold text-foreground mb-2">
+                <h2 className="text-3xl font-bold text-foreground mb-2 max-[770px]:text-2xl">
                   What topics are you studying for{" "}
                   <AnimatePresence mode="wait">
                     <motion.span
@@ -263,9 +263,6 @@ export default function TopicsPage() {
                     </motion.span>
                   </AnimatePresence>
                 </h2>
-                <p className="text-muted-foreground">
-                  Since you&apos;re in Year 11 and this subject does not have optional modules, we&apos;ve auto-selected all topics. You can adjust this as required.
-                </p>
               </div>
             </div>
           </FadeInUp>
@@ -293,42 +290,51 @@ export default function TopicsPage() {
 
                           return (
                             <div key={paper.id} className="border border-border rounded-lg p-4">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-3">
-                                  <span className="text-foreground font-medium">
-                                    {paper.name}
-                                  </span>
-                                  {allSelected && (
+                              <div className="flex flex-col max-[770px]:space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-3">
+                                    <span className="text-foreground font-medium text-sm">
+                                      {paper.name}
+                                    </span>
+                                    {allSelected && (
+                                      <span className="text-primary text-sm font-medium flex items-center hidden min-[771px]:flex">
+                                        Paper selected <Check className="w-4 h-4 ml-1" />
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    {hasTopics && (
+                                      <>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => allSelected 
+                                            ? removeAllTopics(subjectId, paper.id)
+                                            : selectAllTopics(subjectId, paper.id, paper.topics?.map(t => t.id) || [])
+                                          }
+                                          className="text-muted-foreground hover:text-foreground text-xs h-7 px-2"
+                                        >
+                                          {allSelected ? 'Remove All' : 'Select All'}
+                                        </Button>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => togglePaperExpansion(subjectId, paper.id)}
+                                          className="text-muted-foreground hover:text-foreground text-xs h-7 px-2"
+                                        >
+                                          {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                                        </Button>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                                {allSelected && (
+                                  <div className="hidden max-[770px]:block">
                                     <span className="text-primary text-sm font-medium flex items-center">
                                       Paper selected <Check className="w-4 h-4 ml-1" />
                                     </span>
-                                  )}
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  {hasTopics && (
-                                    <>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => allSelected 
-                                          ? removeAllTopics(subjectId, paper.id)
-                                          : selectAllTopics(subjectId, paper.id, paper.topics?.map(t => t.id) || [])
-                                        }
-                                        className="text-muted-foreground hover:text-foreground"
-                                      >
-                                        {allSelected ? 'Remove All' : 'Select All'}
-                                      </Button>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => togglePaperExpansion(subjectId, paper.id)}
-                                        className="text-muted-foreground hover:text-foreground"
-                                      >
-                                        {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                                      </Button>
-                                    </>
-                                  )}
-                                </div>
+                                  </div>
+                                )}
                               </div>
 
                               {hasTopics && isExpanded && (
