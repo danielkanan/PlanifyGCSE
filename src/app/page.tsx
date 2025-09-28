@@ -35,12 +35,29 @@ export default function HomePage() {
                   <UserDropdown user={user} />
                 ) : (
                   <>
-                    <Link href="/login">
-                      <Button variant="ghost" size="sm">Sign In</Button>
-                    </Link>
-                    <Link href="/register">
-                      <Button size="sm">Get Started</Button>
-                    </Link>
+                    {/* Desktop buttons */}
+                    <div className="hidden sm:flex items-center space-x-3">
+                      <Link href="/login">
+                        <Button variant="ghost" size="sm">Sign In</Button>
+                      </Link>
+                      <Link href="/register">
+                        <Button size="sm">Get Started</Button>
+                      </Link>
+                    </div>
+                    {/* Mobile login icon */}
+                    <div className="sm:hidden">
+                      <Link href="/login">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="p-2 border-border bg-background hover:bg-muted"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                          </svg>
+                        </Button>
+                      </Link>
+                    </div>
                   </>
                 )
               )}

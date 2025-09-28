@@ -49,10 +49,10 @@ export default function SubjectProgressPage() {
           {/* Page Title */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-2">
-              Your {subjectName} Progress
+              {subjectName}
             </h1>
             <p className="text-muted-foreground">
-              See your confidence levels in your {subjectName} topics.
+              See your confidence levels in your topics.
             </p>
             <div className="flex items-center justify-between mt-2">
               <div className="flex items-center gap-2">
@@ -66,9 +66,9 @@ export default function SubjectProgressPage() {
                 )}
               </div>
               <Button 
-                variant="ghost" 
+                variant="outline" 
                 size="sm" 
-                className="text-muted-foreground text-xs h-7 px-2"
+                className="text-muted-foreground text-xs h-7 px-2 border-border bg-background hover:bg-muted"
                 onClick={() => router.push(`/edit/subjects/${examBoard}/${subject}/${tier}`)}
               >
                 <Edit className="w-3 h-3 mr-1" />
