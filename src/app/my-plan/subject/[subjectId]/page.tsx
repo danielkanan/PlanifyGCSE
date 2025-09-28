@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { FadeInUp } from "@/components/ui/animate";
 import { ConfidenceSelector } from "@/components/ui/confidence-selector";
 import PlanLayout from "@/components/layout/PlanLayout";
-import { Edit, Flag } from "lucide-react";
+import { Edit } from "lucide-react";
 
 // Dummy data for subject-specific progress
 const getSubjectProgressData = (subjectId: string) => {
@@ -98,19 +98,13 @@ export default function SubjectProgressPage() {
       <FadeInUp>
         <div className="space-y-6">
           {/* Page Title */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">
-                Your {subjectData.name} Progress
-              </h1>
-              <p className="text-muted-foreground">
-                Here, you can see your confidence levels in each of your {subjectData.name} topics.
-              </p>
-            </div>
-            <button className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center space-x-1">
-              <Flag className="w-4 h-4" />
-              <span>Report a Problem</span>
-            </button>
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              Your {subjectData.name} Progress
+            </h1>
+            <p className="text-muted-foreground">
+              Here, you can see your confidence levels in each of your {subjectData.name} topics.
+            </p>
           </div>
 
           {/* Topics */}
@@ -119,7 +113,7 @@ export default function SubjectProgressPage() {
               <div key={topicIndex} className="space-y-4">
                 {/* Topic Name - Outside the card */}
                 <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-bold text-foreground">
+                  <h2 className="text-xl font-bold text-foreground">
                     {topic.name}
                   </h2>
                   {topicIndex === 0 && (
@@ -131,20 +125,37 @@ export default function SubjectProgressPage() {
                 </div>
                 
                 {/* Subtopic Card */}
-                <Card className="p-6 bg-card border border-border">
-                  <div className="space-y-4">
-                    {topic.subtopics.map((subtopic, subtopicIndex) => (
-                      <div key={subtopicIndex} className="flex items-center justify-between py-4 border-b border-border last:border-b-0">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-2 h-2 rounded-full bg-foreground" />
-                          <div>
-                            <p className="text-foreground font-semibold text-lg">{subtopic.name}</p>
-                            <p className="text-sm text-muted-foreground">{subtopic.status}</p>
-                          </div>
-                        </div>
-                        <ConfidenceSelector />
-                      </div>
-                    ))}
+                <Card className="p-3 bg-card border border-border">
+                    <div className="space-y-1">
+                      {topic.subtopics.map((subtopic, subtopicIndex) => (
+                       <div key={subtopicIndex} className="py-2 -mx-3 px-3 border-b border-border last:border-b-0">
+                         {/* Desktop layout (640px and above) */}
+                         <div className="hidden sm:flex items-center justify-between">
+                           <div className="flex items-center space-x-3">
+                             <div className="w-2 h-2 rounded-full bg-foreground" />
+                             <div>
+                               <p className="text-foreground font-semibold text-sm">{subtopic.name}</p>
+                               <p className="text-xs text-muted-foreground">{subtopic.status}</p>
+                             </div>
+                           </div>
+                           <ConfidenceSelector />
+                         </div>
+                         
+                         {/* Mobile layout (below 640px) */}
+                         <div className="sm:hidden space-y-3">
+                           <div className="flex items-center space-x-3">
+                             <div className="w-2 h-2 rounded-full bg-foreground" />
+                             <div>
+                               <p className="text-foreground font-semibold text-sm">{subtopic.name}</p>
+                               <p className="text-xs text-muted-foreground">{subtopic.status}</p>
+                             </div>
+                           </div>
+                           <div>
+                             <ConfidenceSelector />
+                           </div>
+                         </div>
+                       </div>
+                      ))}
                   </div>
                 </Card>
               </div>

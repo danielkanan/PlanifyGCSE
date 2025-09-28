@@ -11,7 +11,9 @@ import {
   Dna, 
   FlaskConical, 
   Atom, 
-  Microscope
+  Microscope,
+  Menu,
+  X
 } from "lucide-react";
 
 interface PlanLayoutProps {
@@ -24,6 +26,8 @@ export default function PlanLayout({ children, currentPage, subjectId }: PlanLay
   const { user, loading } = useAuth();
   const router = useRouter();
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+  const [isMobile, setIsMobile] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     // Clear localStorage on page reload
@@ -34,7 +38,14 @@ export default function PlanLayout({ children, currentPage, subjectId }: PlanLay
       localStorage.removeItem('userName');
     };
 
+    // Check if mobile on mount and resize
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1080);
+    };
+
     window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('resize', checkMobile);
+    checkMobile(); // Check on mount
 
     // Redirect to login if not authenticated
     if (!loading && !user) {
@@ -51,6 +62,7 @@ export default function PlanLayout({ children, currentPage, subjectId }: PlanLay
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('resize', checkMobile);
     };
   }, [user, loading, router]);
 
@@ -93,18 +105,69 @@ export default function PlanLayout({ children, currentPage, subjectId }: PlanLay
     const subject = getSubjectData(subjectId);
     if (subject) {
       router.push(`/my-plan/subject/${subjectId}`);
+      if (isMobile) closeSidebar();
     }
+  };
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
   };
 
   return (
       <div className="min-h-screen bg-background">
+        {/* Mobile Header */}
+        {isMobile && (
+          <div className="sticky top-0 z-50 bg-background border-b border-border px-4 py-3 flex items-center justify-between">
+            <button
+              onClick={toggleSidebar}
+              className="p-2 rounded-md hover:bg-muted transition-colors"
+              aria-label="Toggle sidebar"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <h1 className="text-lg font-bold text-primary">PlanifyGCSE</h1>
+            <div className="w-9" /> {/* Spacer for centering */}
+          </div>
+        )}
+
+        {/* Mobile Overlay */}
+        {isMobile && sidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-40"
+            onClick={closeSidebar}
+          />
+        )}
+
         <div className="flex">
           {/* Sidebar */}
-          <div className="w-64 bg-card border-r border-border min-h-screen p-6">
+          <div className={`
+            ${isMobile 
+              ? `fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out ${
+                  sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+                }` 
+              : 'w-64'
+            } 
+            bg-card border-r border-border min-h-screen p-6
+          `}>
               <div className="mb-8">
-                <h1 className="text-2xl font-bold text-primary mb-8">
-                  PlanifyGCSE
-                </h1>
+                <div className="flex items-center justify-between mb-8">
+                  <h1 className="text-2xl font-bold text-primary">
+                    PlanifyGCSE
+                  </h1>
+                  {isMobile && (
+                    <button
+                      onClick={closeSidebar}
+                      className="p-2 rounded-md hover:bg-muted transition-colors"
+                      aria-label="Close sidebar"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
                 
                 {/* Your Planner Section */}
                 <div className="mb-6">
@@ -118,7 +181,10 @@ export default function PlanLayout({ children, currentPage, subjectId }: PlanLay
                           ? 'bg-primary/10 border border-primary/20' 
                           : 'hover:bg-muted/50'
                       }`}
-                      onClick={() => router.push('/my-plan')}
+                      onClick={() => {
+                        router.push('/my-plan');
+                        if (isMobile) closeSidebar();
+                      }}
                     >
                       <Sun className={`w-5 h-5 ${currentPage === 'plan' ? 'text-primary' : 'text-muted-foreground'}`} />
                       <span className={`font-medium ${currentPage === 'plan' ? 'text-foreground' : 'text-muted-foreground'}`}>
@@ -131,7 +197,10 @@ export default function PlanLayout({ children, currentPage, subjectId }: PlanLay
                           ? 'bg-primary/10 border border-primary/20' 
                           : 'hover:bg-muted/50'
                       }`}
-                      onClick={() => router.push('/my-plan/progress')}
+                      onClick={() => {
+                        router.push('/my-plan/progress');
+                        if (isMobile) closeSidebar();
+                      }}
                     >
                       <BarChart3 className={`w-5 h-5 ${currentPage === 'progress' ? 'text-primary' : 'text-muted-foreground'}`} />
                       <span className={`font-medium ${currentPage === 'progress' ? 'text-foreground' : 'text-muted-foreground'}`}>

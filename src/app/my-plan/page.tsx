@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { FadeInUp } from "@/components/ui/animate";
 import PlanLayout from "@/components/layout/PlanLayout";
-import { Flag } from "lucide-react";
 
 export default function MyPlanPage() {
   const handleGeneratePlan = () => {
@@ -16,19 +15,13 @@ export default function MyPlanPage() {
       <FadeInUp>
         <div className="space-y-6">
           {/* Page Title */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">
-                Create Your Plan For Today
-              </h1>
-              <p className="text-muted-foreground">
-                Get a personalized revision plan tailored to your subjects and progress.
-              </p>
-            </div>
-            <button className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center space-x-1">
-              <Flag className="w-4 h-4" />
-              <span>Report a Problem</span>
-            </button>
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              Create Your Plan For Today
+            </h1>
+            <p className="text-muted-foreground">
+              Get a personalized revision plan tailored to your subjects and progress.
+            </p>
           </div>
 
           {/* Main Content Card */}
@@ -50,7 +43,7 @@ export default function MyPlanPage() {
           {/* Beta Disclaimer */}
           <div className="mt-8">
             <p className="text-xs text-muted-foreground/60 leading-relaxed">
-              <strong>PlanifyGCSE&apos;s Reflective Revision Planner is currently in beta.</strong> We cannot guarantee the accuracy of the exam boards, modules, topics and content listed for your GCSE subjects. Please verify that the topics we have listed cover the curriculum for each of your subjects. If you find any mistakes, please use the &apos;Report a Problem&apos; button so PlanifyGCSE can fix them.
+              <strong>PlanifyGCSE&apos;s Reflective Revision Planner is currently in beta.</strong> We cannot guarantee the accuracy of the exam boards, modules, topics and content listed for your GCSE subjects. Please verify that the topics we have listed cover the curriculum for each of your subjects.
             </p>
           </div>
         </div>

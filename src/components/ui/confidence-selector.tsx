@@ -22,27 +22,27 @@ export function ConfidenceSelector({ value, onChange, disabled = false }: Confid
 
   const getColor = (level: number) => {
     switch (level) {
-      case 1: return "bg-red-500";
-      case 2: return "bg-orange-500";
-      case 3: return "bg-yellow-500";
-      case 4: return "bg-blue-500";
-      case 5: return "bg-green-500";
-      default: return "bg-gray-200";
+      case 1: return "bg-red-500/80";
+      case 2: return "bg-orange-500/80";
+      case 3: return "bg-amber-500/80";
+      case 4: return "bg-blue-500/80";
+      case 5: return "bg-emerald-500/80";
+      default: return "bg-muted";
     }
   };
 
   return (
-    <div className="flex flex-col items-end space-y-2">
-      <div className="flex rounded-lg overflow-hidden border border-border">
+    <div className="flex flex-col items-end sm:items-end space-y-1">
+      <div className="flex rounded-md overflow-hidden border border-border w-full sm:w-auto">
         {[1, 2, 3, 4, 5].map((level) => (
           <button
             key={level}
             onClick={() => handleClick(level)}
             disabled={disabled}
             className={cn(
-              "w-12 h-8 flex items-center justify-center text-white font-medium text-sm transition-all duration-200",
+              "flex-1 sm:w-10 h-7 flex items-center justify-center text-white font-medium text-sm transition-all duration-200",
               getColor(level),
-              selectedValue === level && "ring-2 ring-ring ring-offset-1",
+              selectedValue === level && "ring-1 ring-ring ring-offset-1",
               !disabled && "hover:opacity-80 cursor-pointer",
               disabled && "cursor-not-allowed opacity-50"
             )}
@@ -51,7 +51,7 @@ export function ConfidenceSelector({ value, onChange, disabled = false }: Confid
           </button>
         ))}
       </div>
-      <p className="text-sm text-muted-foreground">Choose an initial confidence level</p>
+      <p className="text-xs text-muted-foreground self-start sm:self-end">Choose confidence level</p>
     </div>
   );
 }
