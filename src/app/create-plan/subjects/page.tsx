@@ -98,7 +98,7 @@ export default function SubjectsPage() {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background">
-        <div className="w-full px-8 py-12">
+        <div className="w-full px-4 pt-4 pb-6 sm:px-8 sm:pt-12 sm:pb-12">
           {/* Header */}
           <FadeInUp>
             <div className="mb-8">

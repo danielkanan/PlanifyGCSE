@@ -7,7 +7,7 @@ export default function PrivacyPolicyPage() {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="container mx-auto px-4 pt-4 pb-6 sm:pt-12 sm:pb-12 max-w-4xl">
           <StaggerContainer className="space-y-8">
             <StaggerItem>
               <div className="text-center mb-8">

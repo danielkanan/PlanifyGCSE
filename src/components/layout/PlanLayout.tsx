@@ -291,7 +291,7 @@ export default function PlanLayout({ children, currentPage, subjectId }: PlanLay
           </div>
 
         {/* Main Content */}
-        <div className="flex-1 px-8 py-8 overflow-y-auto">
+        <div className="flex-1 px-4 pt-4 pb-6 sm:px-8 sm:pt-12 sm:pb-12 overflow-y-auto">
           <PageTransition>
             <FadeInUp>
               <div className="w-full">

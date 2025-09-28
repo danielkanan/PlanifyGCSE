@@ -219,7 +219,7 @@ export default function TopicsPage() {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background">
-        <div className="w-full px-8 py-12">
+        <div className="w-full px-4 pt-4 pb-6 sm:px-8 sm:pt-12 sm:pb-12">
           {/* Back Button and Subject Indicator */}
           <FadeInUp>
             <div className="mb-6 flex items-center justify-between">
