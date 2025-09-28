@@ -17,7 +17,7 @@ export default function TopicsPage() {
   const router = useRouter();
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [examBoardSelections, setExamBoardSelections] = useState<Record<string, string>>({});
-  const [expandedTopics, setExpandedTopics] = useState<Record<string, boolean>>({});
+  const [expandedPapers, setExpandedPapers] = useState<Record<string, boolean>>({});
   const [selectedTopics, setSelectedTopics] = useState<Record<string, string[]>>({});
   const [currentSubjectIndex, setCurrentSubjectIndex] = useState<number>(0);
 
@@ -26,7 +26,14 @@ export default function TopicsPage() {
     if (!examBoardId) return null;
     
     const board = examBoards.find(b => b.id === examBoardId);
-    return board?.subjects.find(s => s.id === subjectId);
+    if (!board) return null;
+    
+    // For tiered subjects, we need to find the specific tier
+    if (subjectId === 'mathematics' || subjectId === 'combined-science') {
+      // Default to higher tier for now - this should be dynamic based on user selection
+      return board.subjects.find(s => s.id === `${subjectId}-higher`);
+    }
+    return board.subjects.find(s => s.id === subjectId);
   }, [examBoardSelections]);
 
   useEffect(() => {
@@ -75,7 +82,7 @@ export default function TopicsPage() {
     };
   }, [user, loading, router]);
 
-  // Auto-select all subtopics when subjects and exam boards are loaded (only if no saved topics)
+  // Auto-select all topics when subjects and exam boards are loaded (only if no saved topics)
   useEffect(() => {
     if (selectedSubjects.length > 0 && Object.keys(examBoardSelections).length > 0 && Object.keys(selectedTopics).length === 0) {
       const newSelectedTopics: Record<string, string[]> = {};
@@ -83,10 +90,10 @@ export default function TopicsPage() {
       selectedSubjects.forEach(subjectId => {
         const subject = getSubjectData(subjectId);
         if (subject) {
-          subject.topics.forEach(topic => {
-            if (topic.subtopics && topic.subtopics.length > 0) {
-              const key = `${subjectId}-${topic.id}`;
-              newSelectedTopics[key] = [...topic.subtopics];
+          subject.papers.forEach(paper => {
+            if (paper.topics && paper.topics.length > 0) {
+              const key = `${subjectId}-${paper.id}`;
+              newSelectedTopics[key] = paper.topics.map(topic => topic.id);
             }
           });
         }
@@ -110,20 +117,20 @@ export default function TopicsPage() {
     return null;
   }
 
-  const toggleTopicExpansion = (subjectId: string, topicId: string) => {
-    const key = `${subjectId}-${topicId}`;
-    setExpandedTopics(prev => ({
+  const togglePaperExpansion = (subjectId: string, paperId: string) => {
+    const key = `${subjectId}-${paperId}`;
+    setExpandedPapers(prev => ({
       ...prev,
       [key]: !prev[key]
     }));
   };
 
-  const toggleSubtopic = (subjectId: string, topicId: string, subtopic: string) => {
-    const key = `${subjectId}-${topicId}`;
+  const toggleTopic = (subjectId: string, paperId: string, topic: string) => {
+    const key = `${subjectId}-${paperId}`;
     const current = selectedTopics[key] || [];
-    const updated = current.includes(subtopic)
-      ? current.filter(s => s !== subtopic)
-      : [...current, subtopic];
+    const updated = current.includes(topic)
+      ? current.filter(s => s !== topic)
+      : [...current, topic];
     
     const newSelection = {
       ...selectedTopics,
@@ -134,8 +141,8 @@ export default function TopicsPage() {
     localStorage.setItem('selectedTopics', JSON.stringify(newSelection));
   };
 
-  const removeAllTopics = (subjectId: string, topicId: string) => {
-    const key = `${subjectId}-${topicId}`;
+  const removeAllTopics = (subjectId: string, paperId: string) => {
+    const key = `${subjectId}-${paperId}`;
     const newSelection = {
       ...selectedTopics,
       [key]: []
@@ -145,11 +152,11 @@ export default function TopicsPage() {
     localStorage.setItem('selectedTopics', JSON.stringify(newSelection));
   };
 
-  const selectAllTopics = (subjectId: string, topicId: string, subtopics: string[]) => {
-    const key = `${subjectId}-${topicId}`;
+  const selectAllTopics = (subjectId: string, paperId: string, topics: string[]) => {
+    const key = `${subjectId}-${paperId}`;
     const newSelection = {
       ...selectedTopics,
-      [key]: subtopics
+      [key]: topics
     };
     
     setSelectedTopics(newSelection);
@@ -275,37 +282,37 @@ export default function TopicsPage() {
                   <StaggerItem key={subjectId}>
                     <Card className="p-6 bg-card">
                       <div className="space-y-3">
-                        {subject.topics.map((topic) => {
-                          const key = `${subjectId}-${topic.id}`;
-                          const isExpanded = expandedTopics[key];
-                          const selectedSubtopicIds = selectedTopics[key] || [];
-                          const hasSubtopic = topic.subtopics && topic.subtopics.length > 0;
-                          const allSelected = hasSubtopic && topic.subtopics?.every(subtopic => 
-                            selectedSubtopicIds.includes(subtopic)
+                        {subject.papers.map((paper) => {
+                          const key = `${subjectId}-${paper.id}`;
+                          const isExpanded = expandedPapers[key];
+                          const selectedTopicIds = selectedTopics[key] || [];
+                          const hasTopics = paper.topics && paper.topics.length > 0;
+                          const allSelected = hasTopics && paper.topics?.every(topic => 
+                            selectedTopicIds.includes(topic.id)
                           );
 
                           return (
-                            <div key={topic.id} className="border border-border rounded-lg p-4">
+                            <div key={paper.id} className="border border-border rounded-lg p-4">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
                                   <span className="text-foreground font-medium">
-                                    {topic.name}
+                                    {paper.name}
                                   </span>
                                   {allSelected && (
                                     <span className="text-primary text-sm font-medium flex items-center">
-                                      Module selected <Check className="w-4 h-4 ml-1" />
+                                      Paper selected <Check className="w-4 h-4 ml-1" />
                                     </span>
                                   )}
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                  {hasSubtopic && (
+                                  {hasTopics && (
                                     <>
                                       <Button
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => allSelected 
-                                          ? removeAllTopics(subjectId, topic.id)
-                                          : selectAllTopics(subjectId, topic.id, topic.subtopics || [])
+                                          ? removeAllTopics(subjectId, paper.id)
+                                          : selectAllTopics(subjectId, paper.id, paper.topics?.map(t => t.id) || [])
                                         }
                                         className="text-muted-foreground hover:text-foreground"
                                       >
@@ -314,7 +321,7 @@ export default function TopicsPage() {
                                       <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => toggleTopicExpansion(subjectId, topic.id)}
+                                        onClick={() => togglePaperExpansion(subjectId, paper.id)}
                                         className="text-muted-foreground hover:text-foreground"
                                       >
                                         {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -324,20 +331,20 @@ export default function TopicsPage() {
                                 </div>
                               </div>
 
-                              {hasSubtopic && isExpanded && (
+                              {hasTopics && isExpanded && (
                                 <div className="mt-4 space-y-2">
                                   <div className="flex justify-between items-center mb-3">
                                     <span className="text-sm text-muted-foreground">
-                                      Select subtopics:
+                                      Select topics:
                                     </span>
                                   </div>
-                                  {topic.subtopics?.map((subtopic) => {
-                                    const isSelected = selectedSubtopicIds.includes(subtopic);
+                                  {paper.topics?.map((topic) => {
+                                    const isSelected = selectedTopicIds.includes(topic.id);
                                     return (
                                       <div
-                                        key={subtopic}
+                                        key={topic.id}
                                         className="flex items-center space-x-3 p-2 rounded hover:bg-muted/50 cursor-pointer"
-                                        onClick={() => toggleSubtopic(subjectId, topic.id, subtopic)}
+                                        onClick={() => toggleTopic(subjectId, paper.id, topic.id)}
                                       >
                                         <div className={`w-4 h-4 border-2 rounded flex items-center justify-center ${
                                           isSelected 
@@ -346,7 +353,7 @@ export default function TopicsPage() {
                                         }`}>
                                           {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
                                         </div>
-                                        <span className="text-foreground text-sm">{subtopic}</span>
+                                        <span className="text-foreground text-sm">{topic.name}</span>
                                       </div>
                                     );
                                   })}

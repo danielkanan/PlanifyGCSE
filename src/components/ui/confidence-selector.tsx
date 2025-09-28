@@ -51,7 +51,7 @@ export function ConfidenceSelector({ value, onChange, disabled = false }: Confid
           </button>
         ))}
       </div>
-      <p className="text-xs text-muted-foreground self-start sm:self-end">Choose confidence level</p>
+      <p className="text-xs text-muted-foreground self-start sm:self-end">Choose initial confidence level</p>
     </div>
   );
 }

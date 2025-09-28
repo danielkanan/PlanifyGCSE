@@ -7,7 +7,6 @@ import PlanLayout from "@/components/layout/PlanLayout";
 export default function MyPlanPage() {
   const handleGeneratePlan = () => {
     // Navigate to plan generation or show plan creation modal
-    console.log('Generate plan clicked');
   };
 
   return (

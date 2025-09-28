@@ -179,6 +179,22 @@ export const markOnboardingCompleted = async (user: User): Promise<void> => {
   }
 };
 
+// Get user plan data from Firestore
+export const getUserPlan = async (user: User): Promise<{ subjects: { id: string; examBoardId?: string; papers?: { id: string; topics: { topicId: number }[] }[] }[] } | null> => {
+  try {
+    const userDocRef = doc(db, 'users', user.uid);
+    const userDoc = await getDoc(userDocRef);
+    
+    if (userDoc.exists()) {
+      return userDoc.data() as { subjects: { id: string; examBoardId?: string; papers?: { id: string; topics: { topicId: number }[] }[] }[] };
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching user plan:", error);
+    throw error;
+  }
+};
+
 // Save user plan data to Firestore
 export const saveUserPlan = async (
   user: User, 
@@ -194,29 +210,34 @@ export const saveUserPlan = async (
       subjects: selectedSubjects.map(subjectId => {
         const examBoardId = examBoardSelections[subjectId];
         const examBoard = examBoards.find(board => board.id === examBoardId);
-        const subject = examBoard?.subjects.find(s => s.id === subjectId);
+        // For tiered subjects, we need to find the specific tier
+        let subject = null;
+        if (subjectId === 'mathematics' || subjectId === 'combined-science') {
+          // Default to higher tier for now - this should be dynamic based on user selection
+          subject = examBoard?.subjects.find(s => s.id === `${subjectId}-higher`);
+        } else {
+          subject = examBoard?.subjects.find(s => s.id === subjectId);
+        }
         
         return {
           id: subjectId,
-          name: subject?.name || '',
-          icon: subject?.icon || '',
-          examBoard: {
-            id: examBoardId,
-            name: examBoard?.name || ''
-          },
-          topics: subject?.topics.map(topic => {
-            const key = `${subjectId}-${topic.id}`;
-            const selectedSubtopics = selectedTopics[key] || [];
+          examBoardId: examBoardId || '',
+          papers: subject?.papers.map(paper => {
+            const key = `${subjectId}-${paper.id}`;
+            const selectedTopicIds = selectedTopics[key] || [];
+            
+            // Only include selected topics
+            const selectedTopicsData = paper.topics
+              .filter(topic => selectedTopicIds.includes(topic.id) && topic.topicId !== undefined)
+              .map(topic => ({
+                topicId: topic.topicId
+              }));
             
             return {
-              id: topic.id,
-              name: topic.name,
-              subtopics: topic.subtopics?.map(subtopic => ({
-                name: subtopic,
-                selected: selectedSubtopics.includes(subtopic)
-              })) || []
+              id: paper.id || '',
+              topics: selectedTopicsData
             };
-          }) || []
+          }).filter(paper => paper.topics.length > 0) || []
         };
       }),
       updatedAt: serverTimestamp()

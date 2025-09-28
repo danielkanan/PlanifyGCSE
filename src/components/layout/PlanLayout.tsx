@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { PageTransition, FadeInUp } from "@/components/ui/animate";
 import { LoadingOverlay } from "@/components/ui/loading";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserPlan } from "@/contexts/UserPlanContext";
+import { examBoards } from "@/lib/subject-data";
 import { 
   Sun, 
   BarChart3, 
@@ -12,6 +14,10 @@ import {
   FlaskConical, 
   Atom, 
   Microscope,
+  Calculator,
+  BookOpen,
+  Briefcase,
+  Monitor,
   Menu,
   X
 } from "lucide-react";
@@ -24,8 +30,8 @@ interface PlanLayoutProps {
 
 export default function PlanLayout({ children, currentPage, subjectId }: PlanLayoutProps) {
   const { user, loading } = useAuth();
+  const { userPlan, selectedSubjects, isLoading } = useUserPlan();
   const router = useRouter();
-  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [isMobile, setIsMobile] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -53,11 +59,7 @@ export default function PlanLayout({ children, currentPage, subjectId }: PlanLay
       return;
     }
 
-    // Load data from localStorage
-    const savedSubjects = localStorage.getItem('selectedSubjects');
-    if (savedSubjects) {
-      setSelectedSubjects(JSON.parse(savedSubjects));
-    }
+    // User plan is now managed by UserPlanContext
     
 
     return () => {
@@ -85,26 +87,36 @@ export default function PlanLayout({ children, currentPage, subjectId }: PlanLay
       Dna,
       FlaskConical,
       Atom,
-      Microscope
+      Microscope,
+      Calculator,
+      BookOpen,
+      Briefcase,
+      Monitor
     };
     return iconMap[iconName as keyof typeof iconMap] || Dna;
   };
 
   const getSubjectData = (subjectId: string) => {
-    // This would normally come from Firestore, but for now we'll use dummy data
-    const dummySubjects = [
-      { id: 'biology', name: 'Biology', icon: 'Dna' },
-      { id: 'chemistry', name: 'Chemistry', icon: 'FlaskConical' },
-      { id: 'physics', name: 'Physics', icon: 'Atom' },
-      { id: 'combined-science', name: 'Combined Science', icon: 'Microscope' }
-    ];
-    return dummySubjects.find(s => s.id === subjectId);
+    // Get subject data from user's plan
+    if (userPlan && userPlan.subjects) {
+      return userPlan.subjects.find((s: { id: string }) => s.id === subjectId);
+    }
+    return null;
   };
 
   const handleSubjectClick = (subjectId: string) => {
     const subject = getSubjectData(subjectId);
     if (subject) {
-      router.push(`/my-plan/subject/${subjectId}`);
+      // Use the exam board from the user's plan
+      const examBoardId = subject.examBoardId || 'aqa';
+      
+      // Check if subject has tiers (mathematics, combined-science)
+      if (subjectId === 'mathematics' || subjectId === 'combined-science') {
+        // Default to higher tier for now
+        router.push(`/subjects/${examBoardId}/${subjectId}/higher`);
+      } else {
+        router.push(`/subjects/${examBoardId}/${subjectId}`);
+      }
       if (isMobile) closeSidebar();
     }
   };
@@ -118,7 +130,7 @@ export default function PlanLayout({ children, currentPage, subjectId }: PlanLay
   };
 
   return (
-      <div className="min-h-screen bg-background">
+      <div className="h-screen bg-background overflow-hidden">
         {/* Mobile Header */}
         {isMobile && (
           <div className="sticky top-0 z-50 bg-background border-b border-border px-4 py-3 flex items-center justify-between">
@@ -142,16 +154,16 @@ export default function PlanLayout({ children, currentPage, subjectId }: PlanLay
           />
         )}
 
-        <div className="flex">
+        <div className="flex h-screen">
           {/* Sidebar */}
           <div className={`
             ${isMobile 
               ? `fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out ${
                   sidebarOpen ? 'translate-x-0' : '-translate-x-full'
                 }` 
-              : 'w-64'
+              : 'w-64 sticky top-0 h-screen'
             } 
-            bg-card border-r border-border min-h-screen p-6
+            bg-card border-r border-border p-6 overflow-y-auto
           `}>
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-8">
@@ -198,7 +210,7 @@ export default function PlanLayout({ children, currentPage, subjectId }: PlanLay
                           : 'hover:bg-muted/50'
                       }`}
                       onClick={() => {
-                        router.push('/my-plan/progress');
+                        router.push('/your-progress');
                         if (isMobile) closeSidebar();
                       }}
                     >
@@ -216,65 +228,61 @@ export default function PlanLayout({ children, currentPage, subjectId }: PlanLay
                     Your Subjects
                   </h2>
                   <div className="space-y-2">
-                    {selectedSubjects.length > 0 ? (
-                  selectedSubjects.map((currentSubjectId) => {
-                    const subject = getSubjectData(currentSubjectId);
-                        if (!subject) return null;
+                    {isLoading ? (
+                      <div className="text-muted-foreground text-sm">
+                        Loading subjects...
+                      </div>
+                    ) : selectedSubjects.length > 0 ? (
+                  selectedSubjects.map((subject) => {
+                    if (!subject) return null;
                         
-                    const isActive = currentPage === 'subject' && currentSubjectId === subjectId;
+                    const isActive = currentPage === 'subject' && subject.id === subjectId;
+                    
+                    // Get subject data from exam board to derive name and icon
+                    const examBoard = examBoards.find(board => board.id === subject.examBoardId);
+                    let subjectData = examBoard?.subjects.find(s => s.id === subject.id);
+                    
+                    // If not found, try to find by base subject ID (for tiered subjects)
+                    if (!subjectData) {
+                      const baseSubjectId = subject.id.replace(/-higher$|-foundation$/, '');
+                      subjectData = examBoard?.subjects.find(s => s.id === baseSubjectId);
+                    }
+                    
+                    // If still not found, try to find by tiered version
+                    if (!subjectData) {
+                      subjectData = examBoard?.subjects.find(s => s.id === `${subject.id}-higher`) ||
+                                   examBoard?.subjects.find(s => s.id === `${subject.id}-foundation`);
+                    }
+                    
+                    const subjectName = subjectData?.name || subject.id;
+                    const subjectIcon = subjectData?.icon || 'BookOpen';
                         
                         return (
                           <div 
-                        key={currentSubjectId} 
+                        key={subject.id} 
                             className={`flex items-center space-x-3 p-2 rounded-lg cursor-pointer transition-colors ${
                               isActive 
                                 ? 'bg-primary/10 border border-primary/20' 
                                 : 'hover:bg-muted/50'
                             }`}
-                        onClick={() => handleSubjectClick(currentSubjectId)}
+                        onClick={() => handleSubjectClick(subject.id)}
                           >
                             <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-foreground">
                               {(() => {
-                                const IconComponent = getIconComponent(subject.icon);
+                                const IconComponent = getIconComponent(subjectIcon);
                                 return <IconComponent className="w-4 h-4" />;
                               })()}
                             </div>
                             <span className={`${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>
-                              {subject.name}
+                              {subjectName}
                             </span>
                           </div>
                         );
                       })
                     ) : (
-                      // Fallback to dummy subjects if no localStorage data
-                  ['biology', 'chemistry', 'physics'].map((currentSubjectId) => {
-                    const subject = getSubjectData(currentSubjectId);
-                        if (!subject) return null;
-                        
-                    const isActive = currentPage === 'subject' && currentSubjectId === subjectId;
-                        
-                        return (
-                          <div 
-                        key={currentSubjectId} 
-                            className={`flex items-center space-x-3 p-2 rounded-lg cursor-pointer transition-colors ${
-                              isActive 
-                                ? 'bg-primary/10 border border-primary/20' 
-                                : 'hover:bg-muted/50'
-                            }`}
-                        onClick={() => handleSubjectClick(currentSubjectId)}
-                          >
-                            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-foreground">
-                              {(() => {
-                                const IconComponent = getIconComponent(subject.icon);
-                                return <IconComponent className="w-4 h-4" />;
-                              })()}
-                            </div>
-                            <span className={`${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>
-                              {subject.name}
-                            </span>
-                          </div>
-                        );
-                      })
+                      <div className="text-muted-foreground text-sm">
+                        No subjects selected
+                      </div>
                     )}
                   </div>
                 </div>
@@ -283,7 +291,7 @@ export default function PlanLayout({ children, currentPage, subjectId }: PlanLay
           </div>
 
         {/* Main Content */}
-        <div className="flex-1 px-8 py-8">
+        <div className="flex-1 px-8 py-8 overflow-y-auto">
           <PageTransition>
             <FadeInUp>
               <div className="w-full">

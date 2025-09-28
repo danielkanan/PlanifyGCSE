@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { hasCompletedOnboarding } from "@/lib/auth";
 import { getAllSubjects } from "@/lib/subject-data";
 import { useRouter } from "next/navigation";
-import { Plus, Dna, FlaskConical, Atom, Microscope } from "lucide-react";
+import { Plus, Dna, FlaskConical, Atom, Microscope, Calculator, BookOpen, Briefcase, Monitor } from "lucide-react";
 
 export default function SubjectsPage() {
   const { user, loading } = useAuth();
@@ -82,7 +82,11 @@ export default function SubjectsPage() {
       Dna,
       FlaskConical,
       Atom,
-      Microscope
+      Microscope,
+      Calculator,
+      BookOpen,
+      Briefcase,
+      Monitor
     };
     return iconMap[iconName as keyof typeof iconMap] || Dna;
   };

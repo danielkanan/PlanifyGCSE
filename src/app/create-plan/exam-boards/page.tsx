@@ -7,7 +7,7 @@ import { PageTransition, FadeInUp, StaggerContainer, StaggerItem } from "@/compo
 import { LoadingOverlay } from "@/components/ui/loading";
 import { useAuth } from "@/contexts/AuthContext";
 import { hasCompletedOnboarding } from "@/lib/auth";
-import { examBoards } from "@/lib/subject-data";
+import { examBoards, getExamBoardsForSubject } from "@/lib/subject-data";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Dna, FlaskConical, Atom, Microscope } from "lucide-react";
 
@@ -142,11 +142,22 @@ export default function ExamBoardsPage() {
           <StaggerContainer>
             <div className="space-y-6">
               {selectedSubjects.map((subjectId) => {
-                const subject = examBoards
-                  .flatMap(board => board.subjects)
-                  .find(s => s.id === subjectId);
+                // Find the subject across all exam boards, handling tiered subjects
+                let subject = null;
+                for (const board of examBoards) {
+                  // For tiered subjects, we'll show the first available tier (higher)
+                  if (subjectId === 'mathematics' || subjectId === 'combined-science') {
+                    subject = board.subjects.find(s => s.id === `${subjectId}-higher`);
+                  } else {
+                    subject = board.subjects.find(s => s.id === subjectId);
+                  }
+                  if (subject) break;
+                }
                 
                 if (!subject) return null;
+                
+                // Get available exam boards for this subject
+                const availableExamBoards = getExamBoardsForSubject(subjectId);
 
                 return (
                   <StaggerItem key={subjectId}>
@@ -170,7 +181,7 @@ export default function ExamBoardsPage() {
                             className="w-full p-3 bg-muted border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                           >
                             <option value="">Select your exam board</option>
-                            {examBoards.map((board) => (
+                            {availableExamBoards.map((board) => (
                               <option key={board.id} value={board.id}>
                                 {board.name}
                               </option>
