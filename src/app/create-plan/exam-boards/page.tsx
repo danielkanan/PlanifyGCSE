@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { hasCompletedOnboarding } from "@/lib/auth";
 import { examBoards, getExamBoardsForSubject } from "@/lib/subject-data";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Dna, FlaskConical, Atom, Microscope } from "lucide-react";
+import { ChevronLeft, Dna, FlaskConical, Atom, Microscope, Calculator, BookOpen, Monitor, Briefcase } from "lucide-react";
 
 export default function ExamBoardsPage() {
   const { user, loading } = useAuth();
@@ -93,7 +93,11 @@ export default function ExamBoardsPage() {
       Dna,
       FlaskConical,
       Atom,
-      Microscope
+      Microscope,
+      Calculator,
+      BookOpen,
+      Monitor,
+      Briefcase
     };
     return iconMap[iconName as keyof typeof iconMap] || Dna;
   };
@@ -113,7 +117,7 @@ export default function ExamBoardsPage() {
                 variant="outline" 
                 size="sm" 
                 onClick={() => router.back()}
-                className="text-muted-foreground hover:text-foreground border-border hover:border-muted-foreground"
+                className="text-muted-foreground hover:text-foreground border-border hover:border-muted-foreground h-8 px-3 text-xs"
               >
                 <ChevronLeft className="w-4 h-4 mr-1" />
                 Go back a step
@@ -232,7 +236,7 @@ export default function ExamBoardsPage() {
               <Button 
                 onClick={handleContinue}
                 disabled={!isAllSelected()}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-2"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2 text-sm"
               >
                 Save & Continue
               </Button>

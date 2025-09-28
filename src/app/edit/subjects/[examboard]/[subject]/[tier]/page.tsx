@@ -201,7 +201,7 @@ export default function EditTopicsPage() {
               variant="outline" 
               size="sm" 
               onClick={handleBack}
-              className="text-muted-foreground hover:text-foreground border-border hover:border-muted-foreground"
+              className="text-muted-foreground hover:text-foreground border-border hover:border-muted-foreground h-8 px-3 text-xs"
             >
               <ChevronLeft className="w-4 h-4 mr-1" />
               Go back
@@ -219,9 +219,8 @@ export default function EditTopicsPage() {
           <StaggerContainer>
             <div className="space-y-4">
               <StaggerItem key={subject}>
-                <Card className="p-6 bg-card">
-                  <div className="space-y-3">
-                    {subjectData.papers.map((paper) => {
+                <div className="space-y-3">
+                  {subjectData.papers.map((paper) => {
                       const key = `${subject}-${paper.id}`;
                       const isExpanded = expandedPapers[key];
                       const selectedTopicIds = selectedTopics[key] || [];
@@ -231,52 +230,83 @@ export default function EditTopicsPage() {
                       );
 
                        return (
-                         <div key={paper.id} className="border border-border rounded-lg p-4">
-                           <div className="flex flex-col max-[770px]:space-y-2">
-                             <div className="flex items-center justify-between">
-                               <div className="flex items-center space-x-3">
-                                 <span className="text-foreground font-medium text-sm">
-                                   {paper.name}
-                                 </span>
-                                 {allSelected && (
-                                   <span className="text-primary text-sm font-medium flex items-center hidden min-[771px]:flex">
-                                     Paper selected <Check className="w-4 h-4 ml-1" />
-                                   </span>
-                                 )}
-                               </div>
-                               <div className="flex items-center space-x-2">
-                                 {hasTopics && (
-                                   <>
-                                     <Button
-                                       variant="outline"
-                                       size="sm"
-                                       onClick={() => allSelected 
-                                         ? removeAllTopics(subject, paper.id)
-                                         : selectAllTopics(subject, paper.id, paper.topics?.map(t => t.id) || [])
-                                       }
-                                       className="text-muted-foreground hover:text-foreground text-xs h-7 px-2"
-                                     >
-                                       {allSelected ? 'Remove All' : 'Select All'}
-                                     </Button>
-                                     <Button
-                                       variant="outline"
-                                       size="sm"
-                                       onClick={() => togglePaperExpansion(subject, paper.id)}
-                                       className="text-muted-foreground hover:text-foreground text-xs h-7 px-2"
-                                     >
-                                       {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                                     </Button>
-                                   </>
-                                 )}
-                               </div>
-                             </div>
-                             {allSelected && (
-                               <div className="hidden max-[770px]:block">
+                         <Card key={paper.id} className="p-4 bg-card">
+                           {/* Desktop layout */}
+                           <div className="hidden min-[771px]:flex items-center justify-between">
+                             <div className="flex items-center space-x-3">
+                               <span className="text-foreground font-medium text-sm">
+                                 {paper.name}
+                               </span>
+                               {allSelected && (
                                  <span className="text-primary text-sm font-medium flex items-center">
                                    Paper selected <Check className="w-4 h-4 ml-1" />
                                  </span>
-                               </div>
-                             )}
+                               )}
+                             </div>
+                             <div className="flex items-center space-x-2">
+                               {hasTopics && (
+                                 <>
+                                   <Button
+                                     variant="outline"
+                                     size="sm"
+                                     onClick={() => allSelected 
+                                       ? removeAllTopics(subject, paper.id)
+                                       : selectAllTopics(subject, paper.id, paper.topics?.map(t => t.id) || [])
+                                     }
+                                     className="text-muted-foreground hover:text-foreground text-xs h-7 px-2"
+                                   >
+                                     {allSelected ? 'Remove All' : 'Select All'}
+                                   </Button>
+                                   <Button
+                                     variant="outline"
+                                     size="sm"
+                                     onClick={() => togglePaperExpansion(subject, paper.id)}
+                                     className="text-muted-foreground hover:text-foreground text-xs h-7 px-2"
+                                   >
+                                     {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                                   </Button>
+                                 </>
+                               )}
+                             </div>
+                           </div>
+
+                           {/* Mobile layout */}
+                           <div className="max-[770px]:flex max-[770px]:items-center max-[770px]:justify-between min-[771px]:hidden">
+                             <div className="flex flex-col">
+                               <span className="text-foreground font-medium text-sm">
+                                 {paper.name}
+                               </span>
+                               {allSelected && (
+                                 <span className="text-primary text-sm font-medium flex items-center">
+                                   Paper selected <Check className="w-4 h-4 ml-1" />
+                                 </span>
+                               )}
+                             </div>
+                             <div className="flex items-center space-x-2">
+                               {hasTopics && (
+                                 <>
+                                   <Button
+                                     variant="outline"
+                                     size="sm"
+                                     onClick={() => allSelected 
+                                       ? removeAllTopics(subject, paper.id)
+                                       : selectAllTopics(subject, paper.id, paper.topics?.map(t => t.id) || [])
+                                     }
+                                     className="text-muted-foreground hover:text-foreground text-xs h-7 px-2"
+                                   >
+                                     {allSelected ? 'Remove All' : 'Select All'}
+                                   </Button>
+                                   <Button
+                                     variant="outline"
+                                     size="sm"
+                                     onClick={() => togglePaperExpansion(subject, paper.id)}
+                                     className="text-muted-foreground hover:text-foreground text-xs h-7 px-2"
+                                   >
+                                     {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                                   </Button>
+                                 </>
+                               )}
+                             </div>
                            </div>
 
                           {hasTopics && isExpanded && (
@@ -307,11 +337,10 @@ export default function EditTopicsPage() {
                               })}
                             </div>
                           )}
-                        </div>
+                        </Card>
                       );
                     })}
-                  </div>
-                </Card>
+                </div>
               </StaggerItem>
             </div>
           </StaggerContainer>

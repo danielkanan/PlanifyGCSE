@@ -55,6 +55,30 @@ export function UserPlanProvider({ children }: { children: ReactNode }) {
     loadUserPlan();
   }, [loadUserPlan]);
 
+  // Listen for storage events to refresh when plan is updated from another tab/window
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'userPlanUpdated' && e.newValue) {
+        loadUserPlan();
+        // Clear the storage event
+        localStorage.removeItem('userPlanUpdated');
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [loadUserPlan]);
+
+  // Listen for custom events to refresh when plan is updated in the same tab
+  useEffect(() => {
+    const handlePlanUpdate = () => {
+      loadUserPlan();
+    };
+
+    window.addEventListener('userPlanUpdated', handlePlanUpdate);
+    return () => window.removeEventListener('userPlanUpdated', handlePlanUpdate);
+  }, [loadUserPlan]);
+
   return (
     <UserPlanContext.Provider value={{
       userPlan,
