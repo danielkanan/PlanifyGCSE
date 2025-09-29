@@ -154,13 +154,15 @@ export default function EditTopicsPage() {
       const updatedSelectedTopics: Record<string, string[]> = {};
       
       // Copy existing selections from other subjects
-      currentSubjects.forEach((subj: { id: string; papers?: { id: string; topics: { topicId: number }[] }[] }) => {
+      currentSubjects.forEach((subj: { id: string; examBoardId?: string; papers?: { id: string; topics: { topicId: number }[] }[] }) => {
         if (subj.id !== subject) {
           subj.papers?.forEach((paper: { id: string; topics: { topicId: number }[] }) => {
             const key = `${subj.id}-${paper.id}`;
             // Map topic IDs back to topic string IDs for other subjects
             const topicIds = paper.topics.map((topicData: { topicId: number }) => {
-              const board = examBoards.find(b => b.id === examBoard);
+              // Use the subject's own exam board, not the current page's exam board
+              const subjectExamBoard = subj.examBoardId || examBoard;
+              const board = examBoards.find(b => b.id === subjectExamBoard);
               const subjectData = board?.subjects.find(s => s.id === subj.id);
               const topic = subjectData?.papers.find(p => p.id === paper.id)?.topics.find(t => t.topicId === topicData.topicId);
               return topic?.id || `topic-${topicData.topicId}`;
